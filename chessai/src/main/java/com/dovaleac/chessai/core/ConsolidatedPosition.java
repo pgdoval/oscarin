@@ -1,73 +1,97 @@
 package com.dovaleac.chessai.core;
 
+import com.dovaleac.chessai.core.moves.Move;
+import com.dovaleac.chessai.core.moves.Square;
+import com.dovaleac.chessai.core.pieces.Piece;
+
+import java.util.Deque;
 import java.util.List;
+import java.util.Map;
 
 public class ConsolidatedPosition {
 
-  private final List<Piece> pieces;
-  private final Turn turn;
-  private final boolean whiteCanCastleKingSide;
-  private final boolean whiteCanCastleQueenSide;
-  private final boolean blackCanCastleKingSide;
-  private final boolean blackCanCastleQueenSide;
-  private final List<Square> enPassant;
+  private Map<Square, Piece> piecesBySquare;
+  private Map<Color, List<Piece>> piecesByColor;
+  private Deque<PositionRewritingInfo> moves;
+  private Color turn;
+  private PositionStatus currentStatus;
 
-  public ConsolidatedPosition(List<Piece> pieces, Turn turn, boolean whiteCanCastleKingSide,
-                              boolean whiteCanCastleQueenSide, boolean blackCanCastleKingSide,
-                              boolean blackCanCastleQueenSide, List<Square> enPassant) {
-    this.pieces = pieces;
+  public ConsolidatedPosition(Map<Square, Piece> piecesBySquare, Map<Color,
+      List<Piece>> piecesByColor, Deque<PositionRewritingInfo> moves, Color turn,
+                              PositionStatus currentStatus) {
+    this.piecesBySquare = piecesBySquare;
+    this.piecesByColor = piecesByColor;
+    this.moves = moves;
     this.turn = turn;
-    this.whiteCanCastleKingSide = whiteCanCastleKingSide;
-    this.whiteCanCastleQueenSide = whiteCanCastleQueenSide;
-    this.blackCanCastleKingSide = blackCanCastleKingSide;
-    this.blackCanCastleQueenSide = blackCanCastleQueenSide;
-    this.enPassant = enPassant;
+    this.currentStatus = currentStatus;
   }
 
   public ConsolidatedPosition move(Move move){
+    PositionStatus newStatus = move.createNewStatus(currentStatus);
+    PositionRewritingInfo info = new PositionRewritingInfo(move, currentStatus);
+
+    move.consolidateMove(piecesBySquare, piecesByColor);
+    turn = turn.flip();
+  }
+
+  public ConsolidatedPosition unmove(Move move){
     return this;
   }
 
-  public List<Piece> getPieces() {
-    return pieces;
+  public boolean isSquareOccupable(Square square) {
+    return square.validateLimits() &&
+        ! isSquareOccupiedByMovingColor(square);
   }
 
-  public Turn getTurn() {
+  public boolean isSquareOccupiedByMovingColor(Square square) {
+    Piece piece = occupyingPiece(square);
+    return piece != null && piece.getColor().equals(turn);
+  }
+
+  public boolean isSquareOccupiedByOppositeColor(Square square) {
+    Piece piece = occupyingPiece(square);
+    return piece != null && !piece.getColor().equals(turn);
+  }
+
+  private Piece occupyingPiece(Square square) {
+    return piecesBySquare.get(square);
+  }
+
+  public Piece getPieceInSquare(Square square) {
+    return piecesBySquare.get(square);
+  }
+
+  public Color getTurn() {
     return turn;
   }
 
-  public boolean isWhiteCanCastleKingSide() {
-    return whiteCanCastleKingSide;
+  public Map<Move, PositionStatus> getMoves() {
+    return moves;
   }
 
-  public boolean isWhiteCanCastleQueenSide() {
-    return whiteCanCastleQueenSide;
+  public int getEnPassant() {
+    return currentStatus.getEnPassant();
   }
 
-  public boolean isBlackCanCastleKingSide() {
-    return blackCanCastleKingSide;
+  public PositionStatus getCurrentStatus() {
+    return currentStatus;
   }
 
-  public boolean isBlackCanCastleQueenSide() {
-    return blackCanCastleQueenSide;
-  }
+  private class PositionRewritingInfo {
+    private final Move move;
+    private final PositionStatus status;
 
-  public List<Square> getEnPassant() {
-    return enPassant;
-  }
-
-  private enum Turn {
-    WHITE(true),
-    BLACK(false);
-
-    public boolean isInner() {
-      return inner;
+    public PositionRewritingInfo(Move move, PositionStatus status) {
+      this.move = move;
+      this.status = status;
     }
 
-    private boolean inner;
+    public Move getMove() {
+      return move;
+    }
 
-    Turn(boolean b) {
-      inner=b;
+    public PositionStatus getStatus() {
+      return status;
     }
   }
 }

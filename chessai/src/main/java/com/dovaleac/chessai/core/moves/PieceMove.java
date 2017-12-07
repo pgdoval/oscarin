@@ -1,10 +1,12 @@
-package com.dovaleac.chessai.core;
+package com.dovaleac.chessai.core.moves;
 
-public class Move {
+import com.dovaleac.chessai.core.pieces.Piece;
+
+public class PieceMove {
   private final Piece piece;
   private final Square targetSquare;
 
-  public Move(Piece piece, Square targetSquare) {
+  public PieceMove(Piece piece, Square targetSquare) {
     this.piece = piece;
     this.targetSquare = targetSquare;
   }
