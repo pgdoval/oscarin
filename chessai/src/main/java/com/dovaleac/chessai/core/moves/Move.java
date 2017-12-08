@@ -1,7 +1,6 @@
 package com.dovaleac.chessai.core.moves;
 
 import com.dovaleac.chessai.core.Color;
-import com.dovaleac.chessai.core.ConsolidatedPosition;
 import com.dovaleac.chessai.core.PositionStatus;
 import com.dovaleac.chessai.core.Side;
 import com.dovaleac.chessai.core.pieces.Figure;

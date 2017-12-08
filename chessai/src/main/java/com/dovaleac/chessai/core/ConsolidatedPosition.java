@@ -28,8 +28,9 @@ public class ConsolidatedPosition {
 
   public ConsolidatedPosition move(Move move){
     PositionStatus newStatus = move.createNewStatus(currentStatus);
-    PositionRewritingInfo info = new PositionRewritingInfo(move, currentStatus);
 
+    moves.add(new PositionRewritingInfo(move, currentStatus));
+    this.currentStatus = newStatus;
     move.consolidateMove(piecesBySquare, piecesByColor);
     turn = turn.flip();
   }

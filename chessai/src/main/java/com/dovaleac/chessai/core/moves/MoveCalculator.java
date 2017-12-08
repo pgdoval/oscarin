@@ -15,8 +15,7 @@ import java.util.stream.Stream;
 
 public abstract class MoveCalculator {
 
-  public abstract List<Move> calculateMoves(ConsolidatedPosition position, Square square,
-                                            Piece piece);
+  public abstract List<Move> calculateMoves(ConsolidatedPosition position, Piece piece);
   public abstract boolean isAttacking(ConsolidatedPosition position, Square targetSquare,
                                       Piece piece);
 
@@ -93,9 +92,9 @@ public abstract class MoveCalculator {
     }
 
     @Override
-    public List<Move> calculateMoves(ConsolidatedPosition position, Square square, Piece piece) {
-      List<Move> result = type1.calculateMoves(position, square, piece);
-      result.addAll(type2.calculateMoves(position, square, piece));
+    public List<Move> calculateMoves(ConsolidatedPosition position, Piece piece) {
+      List<Move> result = type1.calculateMoves(position, piece);
+      result.addAll(type2.calculateMoves(position, piece));
       return result;
     }
 
@@ -124,14 +123,14 @@ public abstract class MoveCalculator {
     }
 
     @Override
-    public List<Move> calculateMoves(ConsolidatedPosition position, Square square, Piece piece) {
+    public List<Move> calculateMoves(ConsolidatedPosition position, Piece piece) {
       List<Move> result = new ArrayList<>(8);
+      Square square = piece.getSquare();
       int r = square.getRow();
       int c = square.getColumn();
 
       boolean isWhite = position.getTurn() == Color.WHITE;
       Square candidateSquare;
-      Piece capturedPiece;
 
       //Simple move
       if (!(((r == 6) && isWhite)
@@ -150,8 +149,8 @@ public abstract class MoveCalculator {
         Square intermediateSquare = new Square(c, isWhite ? r + 1 : r - 1);
         if (!position.isSquareOccupiedByMovingColor(candidateSquare)
             && !position.isSquareOccupiedByOppositeColor(candidateSquare)
-            && !position.isSquareOccupiedByMovingColor(candidateSquare)
-            && !position.isSquareOccupiedByOppositeColor(candidateSquare)) {
+            && !position.isSquareOccupiedByMovingColor(intermediateSquare)
+            && !position.isSquareOccupiedByOppositeColor(intermediateSquare)) {
           result.add(Move.simple(piece, candidateSquare));
         }
       }
@@ -271,7 +270,8 @@ public abstract class MoveCalculator {
     }
 
     @Override
-    public List<Move> calculateMoves(ConsolidatedPosition position, Square square, Piece piece) {
+    public List<Move> calculateMoves(ConsolidatedPosition position, Piece piece) {
+      Square square = piece.getSquare();
       int r = square.getRow();
       int c = square.getColumn();
 
@@ -331,7 +331,7 @@ public abstract class MoveCalculator {
     }
 
     @Override
-    public List<Move> calculateMoves(ConsolidatedPosition position, Square square, Piece piece) {
+    public List<Move> calculateMoves(ConsolidatedPosition position, Piece piece) {
       final Color color = piece.getColor();
 
       return Stream.of(Side.values())
@@ -381,8 +381,9 @@ public abstract class MoveCalculator {
     }
 
     @Override
-    public List<Move> calculateMoves(ConsolidatedPosition position, Square square, Piece piece) {
+    public List<Move> calculateMoves(ConsolidatedPosition position, Piece piece) {
       List<Move> result = new ArrayList<>(14);
+      Square square = piece.getSquare();
       int r = square.getRow();
       int c = square.getColumn();
 
@@ -464,6 +465,8 @@ public abstract class MoveCalculator {
               position.getPieceInSquare(new Square(squareRow, column)) != null);
         }
       }
+
+      return false;
     }
 
   }
@@ -486,7 +489,8 @@ public abstract class MoveCalculator {
     }
 
     @Override
-    public List<Move> calculateMoves(ConsolidatedPosition position, Square square, Piece piece) {
+    public List<Move> calculateMoves(ConsolidatedPosition position, Piece piece) {
+      Square square = piece.getSquare();
       List<Move> result = new ArrayList<>(14);
       int r = square.getRow();
       int c = square.getColumn();
@@ -588,7 +592,8 @@ public abstract class MoveCalculator {
     }
 
     @Override
-    public List<Move> calculateMoves(ConsolidatedPosition position, Square square, Piece piece) {
+    public List<Move> calculateMoves(ConsolidatedPosition position, Piece piece) {
+      Square square = piece.getSquare();
       int r = square.getRow();
       int c = square.getColumn();
 
