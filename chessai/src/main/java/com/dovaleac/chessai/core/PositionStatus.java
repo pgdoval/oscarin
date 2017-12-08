@@ -74,26 +74,6 @@ public class PositionStatus {
       return this;
     }
 
-    public Builder withoutWhiteCanCastleKingside() {
-      this.whiteCanCastleKingside = false;
-      return this;
-    }
-
-    public Builder withoutWhiteCanCastleQueenside() {
-      this.whiteCanCastleQueenside = false;
-      return this;
-    }
-
-    public Builder withoutBlackCanCastleKingside() {
-      this.blackCanCastleKingside = false;
-      return this;
-    }
-
-    public Builder withoutBlackCanCastleQueenside() {
-      this.blackCanCastleQueenside = false;
-      return this;
-    }
-
     public Builder withEnPassant(int enPassant) {
       this.enPassant = enPassant;
       return this;

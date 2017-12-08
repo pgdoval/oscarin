@@ -23,13 +23,20 @@ public class Square {
     return new Square(charArray[0]-'a', charArray[1] - '1');
   }
 
+  @Override
+  public String toString() {
+    String sb = String.valueOf('a' + column) +
+        ('1' + row);
+    return sb;
+  }
+
   public boolean validateLimits() {
     return (
         (column >= 0) &&
-        (column < BOARD_SIZE) &&
-        (row >= 0) &&
-        (row < BOARD_SIZE)
-        );
+            (column < BOARD_SIZE) &&
+            (row >= 0) &&
+            (row < BOARD_SIZE)
+    );
   }
 
   @Override

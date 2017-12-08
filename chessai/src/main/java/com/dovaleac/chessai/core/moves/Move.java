@@ -1,6 +1,7 @@
 package com.dovaleac.chessai.core.moves;
 
 import com.dovaleac.chessai.core.Color;
+import com.dovaleac.chessai.core.Position;
 import com.dovaleac.chessai.core.PositionStatus;
 import com.dovaleac.chessai.core.Side;
 import com.dovaleac.chessai.core.pieces.Figure;
@@ -9,6 +10,7 @@ import com.dovaleac.chessai.core.pieces.Piece;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class Move {
   private final PieceMove mainMove;
@@ -55,6 +57,58 @@ public class Move {
     return new Move(new PieceMove(piece, square), null, capturedFigure);
   }
 
+  public static Move fromNotation(Position position, String notation) {
+    Color color = position.getTurn();
+    char secondChar = notation.charAt(1);
+    if (Objects.equals(notation, "0-0")) {
+      return castling(Side.KINGSIDE, color);
+    }
+    if (Objects.equals(notation, "0-0-0")) {
+      return castling(Side.QUEENSIDE, color);
+    }
+
+    int addForNoPawn = (secondChar > '0' && secondChar < '9') ? 0 : 1;
+    boolean isCapture = notation.contains("x");
+    int addForCapture = isCapture ? 1 : 0;
+
+    Piece piece = Piece.fromNotation(notation.substring(addForNoPawn, addForNoPawn + 2), color);
+    Square targetSquare = Square.fromString(notation
+        .substring(addForCapture + addForNoPawn + 2, addForCapture + addForNoPawn + 4));
+
+    if (isCapture) {
+      Piece capturedPiece = position.getPieceInSquare(targetSquare);
+      return capture(
+          piece,
+          targetSquare,
+          capturedPiece == null ? null : capturedPiece.getFigure()
+      );
+    } else {
+      return simple(piece, targetSquare);
+    }
+  }
+
+  public String notation() {
+    if (secondaryMove != null) {
+      if (secondaryMove.getTargetSquare().getColumn() > 4) {
+        return "0-0";
+      } else {
+        return "0-0-0";
+      }
+    }
+    boolean capture = capturedFigure != null;
+
+    StringBuilder sb = new StringBuilder(7);
+
+    sb.append(mainMove.getPiece().toString());
+
+    if (capture) {
+      sb.append('x');
+    }
+    sb.append(mainMove.getTargetSquare().toString());
+    //queening is missing yet
+    return sb.toString();
+  }
+
   public Figure getCapturedFigure() {
     return capturedFigure;
   }
@@ -93,13 +147,13 @@ public class Move {
       return formerStatus;
     }
 
-    if (mainMove.getPiece().getFigure() == Figure.PAWN) {
-      if (mainMove.getPiece().getSquare().getRow() == secondRow
-          && mainMove.getTargetSquare().getRow() == fourthRow) {
-        return PositionStatus.builder(formerStatus)
-            .withEnPassant(mainMove.getTargetSquare().getColumn())
-            .build();
-      }
+    if (mainMove.getPiece().getFigure() == Figure.PAWN
+        && mainMove.getPiece().getSquare().getRow() == secondRow
+        && mainMove.getTargetSquare().getRow() == fourthRow) {
+      return PositionStatus.builder(formerStatus)
+          .withEnPassant(mainMove.getTargetSquare().getColumn())
+          .build();
+
     }
 
     return formerStatus;
@@ -107,7 +161,7 @@ public class Move {
   }
 
   public void consolidateMove(Map<Square, Piece> piecesBySquare,
-                                            Map<Color, List<Piece>> piecesByColor) {
+                              Map<Color, List<Piece>> piecesByColor) {
     List<PieceMove> singleMoves = new ArrayList<>(2);
     singleMoves.add(mainMove);
     if (secondaryMove != null) {

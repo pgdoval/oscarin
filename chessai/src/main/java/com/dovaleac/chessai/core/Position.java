@@ -8,7 +8,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 
-public class ConsolidatedPosition {
+public class Position {
 
   private Map<Square, Piece> piecesBySquare;
   private Map<Color, List<Piece>> piecesByColor;
@@ -16,9 +16,9 @@ public class ConsolidatedPosition {
   private Color turn;
   private PositionStatus currentStatus;
 
-  public ConsolidatedPosition(Map<Square, Piece> piecesBySquare, Map<Color,
+  public Position(Map<Square, Piece> piecesBySquare, Map<Color,
       List<Piece>> piecesByColor, Deque<PositionRewritingInfo> moves, Color turn,
-                              PositionStatus currentStatus) {
+                  PositionStatus currentStatus) {
     this.piecesBySquare = piecesBySquare;
     this.piecesByColor = piecesByColor;
     this.moves = moves;
@@ -26,7 +26,7 @@ public class ConsolidatedPosition {
     this.currentStatus = currentStatus;
   }
 
-  public ConsolidatedPosition move(Move move){
+  public Position move(Move move){
     PositionStatus newStatus = move.createNewStatus(currentStatus);
 
     moves.add(new PositionRewritingInfo(move, currentStatus));
@@ -35,7 +35,7 @@ public class ConsolidatedPosition {
     turn = turn.flip();
   }
 
-  public ConsolidatedPosition unmove(Move move){
+  public Position unmove(Move move){
     return this;
   }
 

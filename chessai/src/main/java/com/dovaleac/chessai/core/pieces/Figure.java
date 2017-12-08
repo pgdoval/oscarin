@@ -28,6 +28,17 @@ public enum Figure {
     return moveCalculator;
   }
 
+  public static Figure byRepresentation(char c) {
+    switch (c) {
+      case 'K': return KING;
+      case 'N': return KNIGHT;
+      case 'B': return BISHOP;
+      case 'R': return ROOK;
+      case 'Q': return QUEEN;
+      default: return PAWN;
+    }
+  }
+
   public Character getRepresentation() {
     return representation;
   }

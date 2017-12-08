@@ -1,7 +1,7 @@
 package com.dovaleac.chessai.core.pieces;
 
 import com.dovaleac.chessai.core.Color;
-import com.dovaleac.chessai.core.ConsolidatedPosition;
+import com.dovaleac.chessai.core.Position;
 import com.dovaleac.chessai.core.moves.Move;
 import com.dovaleac.chessai.core.moves.Square;
 
@@ -29,6 +29,29 @@ public abstract class Piece {
       case PAWN: return pawn(square, color);
       default: return null;
     }
+  }
+
+  public static Piece fromNotation(String notation, Color color) {
+    if (notation.length() == 2) {
+      return pawn(Square.fromString(notation), color);
+    } else {
+      return of(
+          Figure.byRepresentation(notation.charAt(0)),
+          Square.fromString(notation.substring(1,3)),
+          color
+          );
+    }
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder(3);
+    Character character = figure.getRepresentation();
+    if (character != null) {
+      sb.append(character);
+    }
+    sb.append(square.toString());
+    return sb.toString();
   }
 
   public static Queen queen(Square square, Color color) {
@@ -81,11 +104,11 @@ public abstract class Piece {
     this.square = square;
   }
 
-  public List<Move> getPossibleMoves(ConsolidatedPosition position) {
+  public List<Move> getPossibleMoves(Position position) {
     return figure.getMoveCalculator().calculateMoves(position, square, this);
   }
 
-  public boolean isAttacking(ConsolidatedPosition position, Square targetSquare) {
+  public boolean isAttacking(Position position, Square targetSquare) {
     return figure.getMoveCalculator().isAttacking(position, targetSquare, this);
   }
 

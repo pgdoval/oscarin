@@ -1,7 +1,7 @@
 package com.dovaleac.chessai.core.moves;
 
 import com.dovaleac.chessai.core.Color;
-import com.dovaleac.chessai.core.ConsolidatedPosition;
+import com.dovaleac.chessai.core.Position;
 import com.dovaleac.chessai.core.Side;
 import com.dovaleac.chessai.core.pieces.Figure;
 import com.dovaleac.chessai.core.pieces.Piece;
@@ -15,8 +15,8 @@ import java.util.stream.Stream;
 
 public abstract class MoveCalculator {
 
-  public abstract List<Move> calculateMoves(ConsolidatedPosition position, Piece piece);
-  public abstract boolean isAttacking(ConsolidatedPosition position, Square targetSquare,
+  public abstract List<Move> calculateMoves(Position position, Piece piece);
+  public abstract boolean isAttacking(Position position, Square targetSquare,
                                       Piece piece);
 
   public static MoveCalculator queen() {
@@ -82,6 +82,7 @@ public abstract class MoveCalculator {
     }
   }
 
+
   private static class ComposedMoveCalculator extends MoveCalculator {
     private final MoveCalculator type1;
     private final MoveCalculator type2;
@@ -92,14 +93,14 @@ public abstract class MoveCalculator {
     }
 
     @Override
-    public List<Move> calculateMoves(ConsolidatedPosition position, Piece piece) {
+    public List<Move> calculateMoves(Position position, Piece piece) {
       List<Move> result = type1.calculateMoves(position, piece);
       result.addAll(type2.calculateMoves(position, piece));
       return result;
     }
 
     @Override
-    public boolean isAttacking(ConsolidatedPosition position, Square targetSquare, Piece piece) {
+    public boolean isAttacking(Position position, Square targetSquare, Piece piece) {
       return type1.isAttacking(position, targetSquare, piece)
           || type2.isAttacking(position, targetSquare, piece);
     }
@@ -123,7 +124,7 @@ public abstract class MoveCalculator {
     }
 
     @Override
-    public List<Move> calculateMoves(ConsolidatedPosition position, Piece piece) {
+    public List<Move> calculateMoves(Position position, Piece piece) {
       List<Move> result = new ArrayList<>(8);
       Square square = piece.getSquare();
       int r = square.getRow();
@@ -198,7 +199,7 @@ public abstract class MoveCalculator {
     }
 
     @Override
-    public boolean isAttacking(ConsolidatedPosition position, Square square, Piece piece) {
+    public boolean isAttacking(Position position, Square square, Piece piece) {
       int squareColumn = square.getColumn();
       int pieceColumn = piece.getSquare().getColumn();
 
@@ -213,7 +214,7 @@ public abstract class MoveCalculator {
 
     }
 
-    private Move capture(ConsolidatedPosition position, Piece piece, int c, int r) {
+    private Move capture(Position position, Piece piece, int c, int r) {
       Square candidateSquare = new Square(c, r);
       Piece capturedPiece = position.getPieceInSquare(candidateSquare);
       if (capturedPiece != null && capturedPiece.getColor() != piece.getColor()) {
@@ -222,7 +223,7 @@ public abstract class MoveCalculator {
       return null;
     }
 
-    private List<Move> queening(ConsolidatedPosition position, Piece piece, int c, int r) {
+    private List<Move> queening(Position position, Piece piece, int c, int r) {
       Square candidateSquare = new Square(c, r);
       if (!position.isSquareOccupiedByMovingColor(candidateSquare)
           && !position.isSquareOccupiedByOppositeColor(candidateSquare)) {
@@ -233,7 +234,7 @@ public abstract class MoveCalculator {
       return new ArrayList<>(0);
     }
 
-    private List<Move> queeningCapture(ConsolidatedPosition position, Piece piece, int c, int r) {
+    private List<Move> queeningCapture(Position position, Piece piece, int c, int r) {
       Square candidateSquare;
       Piece capturedPiece;
       candidateSquare = new Square(c, r);
@@ -270,7 +271,7 @@ public abstract class MoveCalculator {
     }
 
     @Override
-    public List<Move> calculateMoves(ConsolidatedPosition position, Piece piece) {
+    public List<Move> calculateMoves(Position position, Piece piece) {
       Square square = piece.getSquare();
       int r = square.getRow();
       int c = square.getColumn();
@@ -297,7 +298,7 @@ public abstract class MoveCalculator {
     }
 
     @Override
-    public boolean isAttacking(ConsolidatedPosition position, Square targetSquare, Piece piece) {
+    public boolean isAttacking(Position position, Square targetSquare, Piece piece) {
       int squareColumn = targetSquare.getColumn();
       int pieceColumn = piece.getSquare().getColumn();
       int pieceRow = piece.getSquare().getRow();
@@ -331,7 +332,7 @@ public abstract class MoveCalculator {
     }
 
     @Override
-    public List<Move> calculateMoves(ConsolidatedPosition position, Piece piece) {
+    public List<Move> calculateMoves(Position position, Piece piece) {
       final Color color = piece.getColor();
 
       return Stream.of(Side.values())
@@ -342,11 +343,11 @@ public abstract class MoveCalculator {
     }
 
     @Override
-    public boolean isAttacking(ConsolidatedPosition position, Square targetSquare, Piece piece) {
+    public boolean isAttacking(Position position, Square targetSquare, Piece piece) {
       return false;
     }
 
-    private boolean areSquaresNecessaryForCastlingFree(ConsolidatedPosition position, Side side,
+    private boolean areSquaresNecessaryForCastlingFree(Position position, Side side,
                                                        Color castlingColor) {
       int firstRow = castlingColor == Color.WHITE ? 0 : 7;
       Stream<Square> necessarySquares = side == Side.KINGSIDE
@@ -360,8 +361,6 @@ public abstract class MoveCalculator {
           .noneMatch(piece -> piece.isAttacking(position, square)));
     }
   }
-
-
   private static class Rook extends MoveCalculator {
 
     private static volatile Rook mInstance;
@@ -381,7 +380,7 @@ public abstract class MoveCalculator {
     }
 
     @Override
-    public List<Move> calculateMoves(ConsolidatedPosition position, Piece piece) {
+    public List<Move> calculateMoves(Position position, Piece piece) {
       List<Move> result = new ArrayList<>(14);
       Square square = piece.getSquare();
       int r = square.getRow();
@@ -432,7 +431,7 @@ public abstract class MoveCalculator {
     }
 
     @Override
-    public boolean isAttacking(ConsolidatedPosition position, Square targetSquare, Piece piece) {
+    public boolean isAttacking(Position position, Square targetSquare, Piece piece) {
       int squareColumn = targetSquare.getColumn();
       int pieceColumn = piece.getSquare().getColumn();
       int squareRow = targetSquare.getRow();
@@ -489,7 +488,7 @@ public abstract class MoveCalculator {
     }
 
     @Override
-    public List<Move> calculateMoves(ConsolidatedPosition position, Piece piece) {
+    public List<Move> calculateMoves(Position position, Piece piece) {
       Square square = piece.getSquare();
       List<Move> result = new ArrayList<>(14);
       int r = square.getRow();
@@ -540,7 +539,7 @@ public abstract class MoveCalculator {
     }
 
     @Override
-    public boolean isAttacking(ConsolidatedPosition position, Square targetSquare, Piece piece) {
+    public boolean isAttacking(Position position, Square targetSquare, Piece piece) {
       int squareColumn = targetSquare.getColumn();
       int pieceColumn = piece.getSquare().getColumn();
       int squareRow = targetSquare.getRow();
@@ -592,7 +591,7 @@ public abstract class MoveCalculator {
     }
 
     @Override
-    public List<Move> calculateMoves(ConsolidatedPosition position, Piece piece) {
+    public List<Move> calculateMoves(Position position, Piece piece) {
       Square square = piece.getSquare();
       int r = square.getRow();
       int c = square.getColumn();
@@ -618,7 +617,7 @@ public abstract class MoveCalculator {
     }
 
     @Override
-    public boolean isAttacking(ConsolidatedPosition position, Square targetSquare, Piece piece) {
+    public boolean isAttacking(Position position, Square targetSquare, Piece piece) {
       int squareColumn = targetSquare.getColumn();
       int pieceColumn = piece.getSquare().getColumn();
       int pieceRow = piece.getSquare().getRow();
@@ -642,7 +641,7 @@ public abstract class MoveCalculator {
 
   }
 
-  private static ValueWithBreak<Move> expandForRookAndBishop(ConsolidatedPosition position, Piece piece,
+  private static ValueWithBreak<Move> expandForRookAndBishop(Position position, Piece piece,
                                                              int column, int row) {
     Square candidateSquare = new Square(column, row);
     Piece capturedPiece;
