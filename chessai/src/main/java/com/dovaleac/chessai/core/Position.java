@@ -4,9 +4,12 @@ import com.dovaleac.chessai.core.moves.Move;
 import com.dovaleac.chessai.core.moves.Square;
 import com.dovaleac.chessai.core.pieces.Piece;
 
+import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Position {
 
@@ -24,6 +27,17 @@ public class Position {
     this.moves = moves;
     this.turn = turn;
     this.currentStatus = currentStatus;
+  }
+
+  public static Position fromPieces(List<Piece> pieces, Deque<PositionRewritingInfo> moves,
+                                    Color turn, PositionStatus currentStatus) {
+    Map<Square, Piece> piecesBySquare =
+        pieces.stream().collect(Collectors.toMap(Piece::getSquare, Function.identity()));
+
+    Map<Color, List<Piece>> piecesByColor =
+        pieces.stream().collect(Collectors.groupingBy(Piece::getColor));
+
+    return new Position(piecesBySquare, piecesByColor, moves, turn, currentStatus);
   }
 
   public Position move(Move move){

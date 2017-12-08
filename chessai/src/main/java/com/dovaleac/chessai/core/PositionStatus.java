@@ -37,6 +37,11 @@ public class PositionStatus {
     return enPassant;
   }
 
+  public static PositionStatus initialStatus() {
+    return new PositionStatus(true, true,
+        true, true, -2);
+  }
+
   public static Builder builder(PositionStatus previousPosition) {
     return new Builder(previousPosition);
   }
