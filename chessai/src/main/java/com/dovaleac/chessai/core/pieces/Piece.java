@@ -1,7 +1,11 @@
 package com.dovaleac.chessai.core.pieces;
 
 import com.dovaleac.chessai.core.Color;
+import com.dovaleac.chessai.core.ConsolidatedPosition;
+import com.dovaleac.chessai.core.moves.Move;
 import com.dovaleac.chessai.core.moves.Square;
+
+import java.util.List;
 
 public abstract class Piece {
   private Figure figure;
@@ -75,6 +79,14 @@ public abstract class Piece {
 
   public void setSquare(Square square) {
     this.square = square;
+  }
+
+  public List<Move> getPossibleMoves(ConsolidatedPosition position) {
+    return figure.getMoveCalculator().calculateMoves(position, square, this);
+  }
+
+  public boolean isAttacking(ConsolidatedPosition position, Square targetSquare) {
+    return figure.getMoveCalculator().isAttacking(position, targetSquare, this);
   }
 
 

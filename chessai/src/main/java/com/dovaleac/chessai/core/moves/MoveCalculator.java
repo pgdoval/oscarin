@@ -2,18 +2,23 @@ package com.dovaleac.chessai.core.moves;
 
 import com.dovaleac.chessai.core.Color;
 import com.dovaleac.chessai.core.ConsolidatedPosition;
+import com.dovaleac.chessai.core.Side;
 import com.dovaleac.chessai.core.pieces.Figure;
 import com.dovaleac.chessai.core.pieces.Piece;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public abstract class MoveCalculator {
 
   public abstract List<Move> calculateMoves(ConsolidatedPosition position, Square square,
                                             Piece piece);
+  public abstract boolean isAttacking(ConsolidatedPosition position, Square targetSquare,
+                                      Piece piece);
 
   public static MoveCalculator queen() {
     return Queen.getInstance();
@@ -58,6 +63,25 @@ public abstract class MoveCalculator {
       return mInstance;
     }
   }
+  private static class King extends ComposedMoveCalculator {
+
+    private static volatile King mInstance;
+
+    public King() {
+      super(SimpleKing.getInstance(), Castling.getInstance());
+    }
+
+    public static King getInstance() {
+      if (mInstance == null) {
+        synchronized (King.class) {
+          if (mInstance == null) {
+            mInstance = new King();
+          }
+        }
+      }
+      return mInstance;
+    }
+  }
 
   private static class ComposedMoveCalculator extends MoveCalculator {
     private final MoveCalculator type1;
@@ -73,6 +97,12 @@ public abstract class MoveCalculator {
       List<Move> result = type1.calculateMoves(position, square, piece);
       result.addAll(type2.calculateMoves(position, square, piece));
       return result;
+    }
+
+    @Override
+    public boolean isAttacking(ConsolidatedPosition position, Square targetSquare, Piece piece) {
+      return type1.isAttacking(position, targetSquare, piece)
+          || type2.isAttacking(position, targetSquare, piece);
     }
   }
   private static class Pawn extends MoveCalculator {
@@ -168,6 +198,22 @@ public abstract class MoveCalculator {
       return result;
     }
 
+    @Override
+    public boolean isAttacking(ConsolidatedPosition position, Square square, Piece piece) {
+      int squareColumn = square.getColumn();
+      int pieceColumn = piece.getSquare().getColumn();
+
+      if (squareColumn != pieceColumn + 1 && squareColumn != pieceColumn - 1) {
+        return false;
+      }
+
+      int pieceRow = piece.getSquare().getRow();
+      int squareRow = square.getRow();
+      return squareRow == pieceRow + (piece.getColor() == Color.WHITE ? 1 : -1) ||
+          (squareColumn == position.getEnPassant() && pieceRow == squareRow);
+
+    }
+
     private Move capture(ConsolidatedPosition position, Piece piece, int c, int r) {
       Square candidateSquare = new Square(c, r);
       Piece capturedPiece = position.getPieceInSquare(candidateSquare);
@@ -206,18 +252,18 @@ public abstract class MoveCalculator {
 
 
   }
-  private static class King extends MoveCalculator {
+  private static class SimpleKing extends MoveCalculator {
 
-    private static volatile King mInstance;
+    private static volatile SimpleKing mInstance;
 
-    private King() {
+    private SimpleKing() {
     }
 
-    public static King getInstance() {
+    public static SimpleKing getInstance() {
       if (mInstance == null) {
-        synchronized (King.class) {
+        synchronized (SimpleKing.class) {
           if (mInstance == null) {
-            mInstance = new King();
+            mInstance = new SimpleKing();
           }
         }
       }
@@ -250,7 +296,72 @@ public abstract class MoveCalculator {
 
     }
 
+    @Override
+    public boolean isAttacking(ConsolidatedPosition position, Square targetSquare, Piece piece) {
+      int squareColumn = targetSquare.getColumn();
+      int pieceColumn = piece.getSquare().getColumn();
+      int pieceRow = piece.getSquare().getRow();
+      int squareRow = targetSquare.getRow();
+
+      List<Integer> ranges = Arrays.asList(-1, 0, 1);
+
+      return (ranges.contains(squareColumn - pieceColumn)
+          && ranges.contains(squareRow - pieceRow)
+          && !(squareColumn == pieceColumn && squareRow == pieceRow));
+
+    }
+
   }
+  private static class Castling extends MoveCalculator {
+
+    private static volatile Castling mInstance;
+
+    private Castling() {
+    }
+
+    public static Castling getInstance() {
+      if (mInstance == null) {
+        synchronized (Castling.class) {
+          if (mInstance == null) {
+            mInstance = new Castling();
+          }
+        }
+      }
+      return mInstance;
+    }
+
+    @Override
+    public List<Move> calculateMoves(ConsolidatedPosition position, Square square, Piece piece) {
+      final Color color = piece.getColor();
+
+      return Stream.of(Side.values())
+          .filter(side -> position.canCastle(side, color)
+              && areSquaresNecessaryForCastlingFree(position, side, color))
+          .map(side -> Move.castling(side, color))
+          .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean isAttacking(ConsolidatedPosition position, Square targetSquare, Piece piece) {
+      return false;
+    }
+
+    private boolean areSquaresNecessaryForCastlingFree(ConsolidatedPosition position, Side side,
+                                                       Color castlingColor) {
+      int firstRow = castlingColor == Color.WHITE ? 0 : 7;
+      Stream<Square> necessarySquares = side == Side.KINGSIDE
+          ? Stream.of(new Square(4, firstRow), new Square(5, firstRow), new Square(6, firstRow))
+          : Stream.of(new Square(4, firstRow), new Square(3, firstRow),
+          new Square(2, firstRow), new Square(1, firstRow));
+
+      return necessarySquares.noneMatch(square -> position.isSquareOccupiedByMovingColor(square)
+          || position.isSquareOccupiedByOppositeColor(square)
+          || position.getPiecesByColor(castlingColor).stream()
+          .noneMatch(piece -> piece.isAttacking(position, square)));
+    }
+  }
+
+
   private static class Rook extends MoveCalculator {
 
     private static volatile Rook mInstance;
@@ -317,6 +428,42 @@ public abstract class MoveCalculator {
       }
 
       return result;
+    }
+
+    @Override
+    public boolean isAttacking(ConsolidatedPosition position, Square targetSquare, Piece piece) {
+      int squareColumn = targetSquare.getColumn();
+      int pieceColumn = piece.getSquare().getColumn();
+      int squareRow = targetSquare.getRow();
+      int pieceRow = piece.getSquare().getRow();
+
+      if (squareColumn == pieceColumn) {
+        int rowDiff = squareRow - pieceRow;
+        if (rowDiff == 0) {
+          return false;
+        }
+        if (rowDiff > 0) {
+          return IntStream.range(pieceRow + 1, squareRow).noneMatch(row ->
+              position.getPieceInSquare(new Square(squareColumn, row)) != null);
+        } else {
+          return IntStream.range(squareRow + 1, pieceRow).noneMatch(row ->
+              position.getPieceInSquare(new Square(squareColumn, row)) != null);
+        }
+      }
+
+      if (squareRow == pieceRow) {
+        int columnDiff = squareColumn - pieceColumn;
+        if (columnDiff == 0) {
+          return false;
+        }
+        if (columnDiff > 0) {
+          return IntStream.range(pieceColumn + 1, squareColumn).noneMatch(column ->
+              position.getPieceInSquare(new Square(squareRow, column)) != null);
+        } else {
+          return IntStream.range(squareColumn + 1, pieceColumn).noneMatch(column ->
+              position.getPieceInSquare(new Square(squareRow, column)) != null);
+        }
+      }
     }
 
   }
@@ -388,6 +535,39 @@ public abstract class MoveCalculator {
       return result;
     }
 
+    @Override
+    public boolean isAttacking(ConsolidatedPosition position, Square targetSquare, Piece piece) {
+      int squareColumn = targetSquare.getColumn();
+      int pieceColumn = piece.getSquare().getColumn();
+      int squareRow = targetSquare.getRow();
+      int pieceRow = piece.getSquare().getRow();
+
+      int rowDiff = squareRow - pieceRow;
+      int columnDiff = squareColumn - pieceColumn;
+
+
+      if (rowDiff == columnDiff) {
+        if (rowDiff > 0) {
+          return IntStream.range(1, rowDiff).noneMatch(i ->
+              position.getPieceInSquare(new Square(pieceColumn + i, pieceRow + i)) != null);
+        } else {
+          return IntStream.range(1, -rowDiff).noneMatch(i ->
+              position.getPieceInSquare(new Square(pieceColumn - i, pieceRow - i)) != null);
+        }
+      }
+
+      if (rowDiff == -columnDiff) {
+        if (rowDiff > 0) {
+          return IntStream.range(1, rowDiff).noneMatch(i ->
+              position.getPieceInSquare(new Square(pieceColumn - i, pieceRow + i)) != null);
+        } else {
+          return IntStream.range(1, columnDiff).noneMatch(i ->
+              position.getPieceInSquare(new Square(pieceColumn + i, pieceRow - i)) != null);
+        }
+      }
+
+      return false;
+    }
   }
   private static class Knight extends MoveCalculator {
 
@@ -414,13 +594,13 @@ public abstract class MoveCalculator {
 
       return Stream.of(
           new Square(c-1, r-2),
-      new Square(c-1, r+2),
-      new Square(c+1, r-2),
-      new Square(c+1, r+2),
-      new Square(c-2, r-1),
-      new Square(c-2, r+1),
-      new Square(c+2, r-1),
-      new Square(c+2, r+1)
+          new Square(c-1, r+2),
+          new Square(c+1, r-2),
+          new Square(c+1, r+2),
+          new Square(c-2, r-1),
+          new Square(c-2, r+1),
+          new Square(c+2, r-1),
+          new Square(c+2, r+1)
       ).filter(candidateSquare -> !position.isSquareOccupiedByMovingColor(candidateSquare))
           .map(candidateSquare -> {
             Piece capturedPiece = position.getPieceInSquare(candidateSquare);
@@ -432,6 +612,19 @@ public abstract class MoveCalculator {
           }).collect(Collectors.toList());
     }
 
+    @Override
+    public boolean isAttacking(ConsolidatedPosition position, Square targetSquare, Piece piece) {
+      int squareColumn = targetSquare.getColumn();
+      int pieceColumn = piece.getSquare().getColumn();
+      int pieceRow = piece.getSquare().getRow();
+      int squareRow = targetSquare.getRow();
+
+      int rowDiff = Math.abs(squareRow - pieceRow);
+      int columnDiff = Math.abs(squareColumn - pieceColumn);
+
+      return (rowDiff == 2 && columnDiff == 1)
+          || (rowDiff == 1 && columnDiff == 2);
+    }
   }
   private static class ValueWithBreak<T> {
 
@@ -445,7 +638,7 @@ public abstract class MoveCalculator {
   }
 
   private static ValueWithBreak<Move> expandForRookAndBishop(ConsolidatedPosition position, Piece piece,
-                                                      int column, int row) {
+                                                             int column, int row) {
     Square candidateSquare = new Square(column, row);
     Piece capturedPiece;
     capturedPiece = position.getPieceInSquare(candidateSquare);

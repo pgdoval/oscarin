@@ -19,4 +19,16 @@ public enum Figure {
     this.moveCalculator = moveCalculator;
     this.representation = representation;
   }
+
+  public double getBaseValue() {
+    return baseValue;
+  }
+
+  public MoveCalculator getMoveCalculator() {
+    return moveCalculator;
+  }
+
+  public Character getRepresentation() {
+    return representation;
+  }
 }

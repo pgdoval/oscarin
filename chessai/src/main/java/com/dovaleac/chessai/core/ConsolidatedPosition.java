@@ -38,10 +38,6 @@ public class ConsolidatedPosition {
     return this;
   }
 
-  public boolean isSquareOccupable(Square square) {
-    return square.validateLimits() &&
-        ! isSquareOccupiedByMovingColor(square);
-  }
 
   public boolean isSquareOccupiedByMovingColor(Square square) {
     Piece piece = occupyingPiece(square);
@@ -65,16 +61,28 @@ public class ConsolidatedPosition {
     return turn;
   }
 
-  public Map<Move, PositionStatus> getMoves() {
-    return moves;
-  }
-
   public int getEnPassant() {
     return currentStatus.getEnPassant();
   }
 
-  public PositionStatus getCurrentStatus() {
-    return currentStatus;
+  public boolean canCastle(Side side, Color color) {
+    if (side == Side.KINGSIDE) {
+      if (color == Color.WHITE) {
+        return currentStatus.isWhiteCanCastleKingside();
+      } else {
+        return currentStatus.isBlackCanCastleKingside();
+      }
+    } else {
+      if (color == Color.WHITE) {
+        return currentStatus.isWhiteCanCastleQueenside();
+      } else {
+        return currentStatus.isBlackCanCastleQueenside();
+      }
+    }
+  }
+
+  public List<Piece> getPiecesByColor(Color color) {
+    return piecesByColor.get(color);
   }
 
   private class PositionRewritingInfo {
