@@ -7,9 +7,4 @@ public class Pawn extends Piece {
   Pawn(Square square, Color color) {
     super(Figure.PAWN, square, color);
   }
-
-  @Override
-  public Piece move(Square square, Figure figureToCrown) {
-
-  }
 }

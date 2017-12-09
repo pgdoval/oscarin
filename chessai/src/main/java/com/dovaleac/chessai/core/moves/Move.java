@@ -42,9 +42,9 @@ public class Move {
     }
 
     PieceMove mainMove = new PieceMove( Piece.king(
-        new Square(kingInitial, row), colorToMove), new Square(kingFinal, row));
+        Square.of(kingInitial, row), colorToMove), Square.of(kingFinal, row));
     PieceMove secondaryMove = new PieceMove( Piece.rook(
-        new Square(rookInitial, row), colorToMove), new Square(rookFinal, row));
+        Square.of(rookInitial, row), colorToMove), Square.of(rookFinal, row));
 
     return new Move(mainMove, secondaryMove, null);
   }
@@ -58,6 +58,9 @@ public class Move {
   }
 
   public static Move fromNotation(Position position, String notation) {
+    if (notation.length() < 2) {
+      return null;
+    }
     Color color = position.getTurn();
     char secondChar = notation.charAt(1);
     if (Objects.equals(notation, "0-0")) {

@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 public class PositionFactory {
 
-  public Position initialPosition() {
+  public static Position initialPosition() {
     List<Piece> pieces = Stream.of(
         "Ra1",
         "Nb1",

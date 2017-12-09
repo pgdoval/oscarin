@@ -9,6 +9,7 @@ import com.dovaleac.chessai.core.pieces.Piece;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -136,7 +137,7 @@ public abstract class MoveCalculator {
       //Simple move
       if (!(((r == 6) && isWhite)
           || ((r == 1) && !isWhite))) {
-        candidateSquare = new Square(c, isWhite ? r + 1 : r - 1);
+        candidateSquare = Square.of(c, isWhite ? r + 1 : r - 1);
         if (!position.isSquareOccupiedByMovingColor(candidateSquare)
             && !position.isSquareOccupiedByOppositeColor(candidateSquare)) {
           result.add(Move.simple(piece, candidateSquare));
@@ -146,8 +147,8 @@ public abstract class MoveCalculator {
       //Double advance
       if (((r == 1) && isWhite)
           || ((r == 6) && !isWhite)) {
-        candidateSquare = new Square(c, isWhite ? r + 2 : r - 2);
-        Square intermediateSquare = new Square(c, isWhite ? r + 1 : r - 1);
+        candidateSquare = Square.of(c, isWhite ? r + 2 : r - 2);
+        Square intermediateSquare = Square.of(c, isWhite ? r + 1 : r - 1);
         if (!position.isSquareOccupiedByMovingColor(candidateSquare)
             && !position.isSquareOccupiedByOppositeColor(candidateSquare)
             && !position.isSquareOccupiedByMovingColor(intermediateSquare)
@@ -215,7 +216,7 @@ public abstract class MoveCalculator {
     }
 
     private Move capture(Position position, Piece piece, int c, int r) {
-      Square candidateSquare = new Square(c, r);
+      Square candidateSquare = Square.of(c, r);
       Piece capturedPiece = position.getPieceInSquare(candidateSquare);
       if (capturedPiece != null && capturedPiece.getColor() != piece.getColor()) {
         return Move.capture(piece, candidateSquare, capturedPiece.getFigure());
@@ -224,11 +225,13 @@ public abstract class MoveCalculator {
     }
 
     private List<Move> queening(Position position, Piece piece, int c, int r) {
-      Square candidateSquare = new Square(c, r);
-      if (!position.isSquareOccupiedByMovingColor(candidateSquare)
+      Square candidateSquare = Square.of(c, r);
+      if (candidateSquare != null
+          && !position.isSquareOccupiedByMovingColor(candidateSquare)
           && !position.isSquareOccupiedByOppositeColor(candidateSquare)) {
         return Stream.of(Figure.values())
-            .map(figure -> Move.simple(Piece.of(figure, piece.getSquare(), piece.getColor()), candidateSquare))
+            .map(figure -> Move.simple(
+                Piece.of(figure, piece.getSquare(), piece.getColor()), candidateSquare))
             .collect(Collectors.toList());
       }
       return new ArrayList<>(0);
@@ -237,7 +240,7 @@ public abstract class MoveCalculator {
     private List<Move> queeningCapture(Position position, Piece piece, int c, int r) {
       Square candidateSquare;
       Piece capturedPiece;
-      candidateSquare = new Square(c, r);
+      candidateSquare = Square.of(c, r);
 
       capturedPiece = position.getPieceInSquare(candidateSquare);
       if (capturedPiece != null && capturedPiece.getColor() != piece.getColor()) {
@@ -277,15 +280,16 @@ public abstract class MoveCalculator {
       int c = square.getColumn();
 
       return Stream.of(
-          new Square(c-1, r-1),
-          new Square(c-1, r),
-          new Square(c-1, r+1),
-          new Square(c, r-1),
-          new Square(c, r+1),
-          new Square(c+1, r-1),
-          new Square(c+1, r),
-          new Square(c+1, r+1)
-      ).filter(candidateSquare -> !position.isSquareOccupiedByMovingColor(candidateSquare))
+          Square.of(c-1, r-1),
+          Square.of(c-1, r),
+          Square.of(c-1, r+1),
+          Square.of(c, r-1),
+          Square.of(c, r+1),
+          Square.of(c+1, r-1),
+          Square.of(c+1, r),
+          Square.of(c+1, r+1)
+      ).filter(Objects::nonNull)
+          .filter(candidateSquare -> !position.isSquareOccupiedByMovingColor(candidateSquare))
           .map(candidateSquare -> {
             Piece capturedPiece = position.getPieceInSquare(candidateSquare);
             if (capturedPiece == null) {
@@ -351,9 +355,9 @@ public abstract class MoveCalculator {
                                                        Color castlingColor) {
       int firstRow = castlingColor == Color.WHITE ? 0 : 7;
       Stream<Square> necessarySquares = side == Side.KINGSIDE
-          ? Stream.of(new Square(4, firstRow), new Square(5, firstRow), new Square(6, firstRow))
-          : Stream.of(new Square(4, firstRow), new Square(3, firstRow),
-          new Square(2, firstRow), new Square(1, firstRow));
+          ? Stream.of(Square.of(4, firstRow), Square.of(5, firstRow), Square.of(6, firstRow))
+          : Stream.of(Square.of(4, firstRow), Square.of(3, firstRow),
+          Square.of(2, firstRow), Square.of(1, firstRow));
 
       return necessarySquares.noneMatch(square -> position.isSquareOccupiedByMovingColor(square)
           || position.isSquareOccupiedByOppositeColor(square)
@@ -444,10 +448,10 @@ public abstract class MoveCalculator {
         }
         if (rowDiff > 0) {
           return IntStream.range(pieceRow + 1, squareRow).noneMatch(row ->
-              position.getPieceInSquare(new Square(squareColumn, row)) != null);
+              position.getPieceInSquare(Square.of(squareColumn, row)) != null);
         } else {
           return IntStream.range(squareRow + 1, pieceRow).noneMatch(row ->
-              position.getPieceInSquare(new Square(squareColumn, row)) != null);
+              position.getPieceInSquare(Square.of(squareColumn, row)) != null);
         }
       }
 
@@ -458,10 +462,10 @@ public abstract class MoveCalculator {
         }
         if (columnDiff > 0) {
           return IntStream.range(pieceColumn + 1, squareColumn).noneMatch(column ->
-              position.getPieceInSquare(new Square(squareRow, column)) != null);
+              position.getPieceInSquare(Square.of(squareRow, column)) != null);
         } else {
           return IntStream.range(squareColumn + 1, pieceColumn).noneMatch(column ->
-              position.getPieceInSquare(new Square(squareRow, column)) != null);
+              position.getPieceInSquare(Square.of(squareRow, column)) != null);
         }
       }
 
@@ -552,20 +556,20 @@ public abstract class MoveCalculator {
       if (rowDiff == columnDiff) {
         if (rowDiff > 0) {
           return IntStream.range(1, rowDiff).noneMatch(i ->
-              position.getPieceInSquare(new Square(pieceColumn + i, pieceRow + i)) != null);
+              position.getPieceInSquare(Square.of(pieceColumn + i, pieceRow + i)) != null);
         } else {
           return IntStream.range(1, -rowDiff).noneMatch(i ->
-              position.getPieceInSquare(new Square(pieceColumn - i, pieceRow - i)) != null);
+              position.getPieceInSquare(Square.of(pieceColumn - i, pieceRow - i)) != null);
         }
       }
 
       if (rowDiff == -columnDiff) {
         if (rowDiff > 0) {
           return IntStream.range(1, rowDiff).noneMatch(i ->
-              position.getPieceInSquare(new Square(pieceColumn - i, pieceRow + i)) != null);
+              position.getPieceInSquare(Square.of(pieceColumn - i, pieceRow + i)) != null);
         } else {
           return IntStream.range(1, columnDiff).noneMatch(i ->
-              position.getPieceInSquare(new Square(pieceColumn + i, pieceRow - i)) != null);
+              position.getPieceInSquare(Square.of(pieceColumn + i, pieceRow - i)) != null);
         }
       }
 
@@ -597,15 +601,16 @@ public abstract class MoveCalculator {
       int c = square.getColumn();
 
       return Stream.of(
-          new Square(c-1, r-2),
-          new Square(c-1, r+2),
-          new Square(c+1, r-2),
-          new Square(c+1, r+2),
-          new Square(c-2, r-1),
-          new Square(c-2, r+1),
-          new Square(c+2, r-1),
-          new Square(c+2, r+1)
-      ).filter(candidateSquare -> !position.isSquareOccupiedByMovingColor(candidateSquare))
+          Square.of(c-1, r-2),
+          Square.of(c-1, r+2),
+          Square.of(c+1, r-2),
+          Square.of(c+1, r+2),
+          Square.of(c-2, r-1),
+          Square.of(c-2, r+1),
+          Square.of(c+2, r-1),
+          Square.of(c+2, r+1)
+      ).filter(Objects::nonNull)
+          .filter(candidateSquare -> !position.isSquareOccupiedByMovingColor(candidateSquare))
           .map(candidateSquare -> {
             Piece capturedPiece = position.getPieceInSquare(candidateSquare);
             if (capturedPiece == null) {
@@ -643,7 +648,7 @@ public abstract class MoveCalculator {
 
   private static ValueWithBreak<Move> expandForRookAndBishop(Position position, Piece piece,
                                                              int column, int row) {
-    Square candidateSquare = new Square(column, row);
+    Square candidateSquare = Square.of(column, row);
     Piece capturedPiece;
     capturedPiece = position.getPieceInSquare(candidateSquare);
 

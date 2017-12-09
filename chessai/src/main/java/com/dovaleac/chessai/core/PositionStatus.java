@@ -86,7 +86,7 @@ public class PositionStatus {
 
     public PositionStatus build() {
       return new PositionStatus(whiteCanCastleKingside, whiteCanCastleQueenside,
-          blackCanCastleKingside, blackCanCastleQueenside, enPassant)
+          blackCanCastleKingside, blackCanCastleQueenside, enPassant);
     }
   }
 }

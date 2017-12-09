@@ -41,12 +41,16 @@ public class Position {
   }
 
   public Position move(Move move){
+    if (move == null) {
+      return this;
+    }
     PositionStatus newStatus = move.createNewStatus(currentStatus);
 
     moves.add(new PositionRewritingInfo(move, currentStatus));
     this.currentStatus = newStatus;
     move.consolidateMove(piecesBySquare, piecesByColor);
     turn = turn.flip();
+    return this;
   }
 
   public Position unmove(Move move){

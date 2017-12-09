@@ -7,9 +7,4 @@ public class Rook extends Piece {
   Rook(Square square, Color color) {
     super(Figure.ROOK, square, color);
   }
-
-  @Override
-  public Piece move(Square square, Figure figureToCrown) {
-
-  }
 }

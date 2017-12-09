@@ -1,11 +1,19 @@
 package com.dovaleac.chessai.core.moves;
 
+import java.util.stream.IntStream;
+
 public class Square {
-  public static final int BOARD_SIZE = 8;
+
+  public static final int BOARD_SIZE;
+  private static Square [][] squares;
   private final int column;
   private final int row;
 
-  Square(int column, int row) {
+  static {
+    BOARD_SIZE = 8;
+  }
+
+  private Square(int column, int row) {
     this.column = column;
     this.row = row;
   }
@@ -20,17 +28,30 @@ public class Square {
 
   public static Square fromString(String key) {
     char[] charArray = key.toCharArray();
-    return new Square(charArray[0]-'a', charArray[1] - '1');
+    return of(charArray[0]-'a', charArray[1] - '1');
+  }
+
+  public static Square of(int column, int row) {
+    if (!validateLimits(column, row)) {
+      return null;
+    }
+    if (squares == null) {
+      squares =
+          IntStream.range(0, BOARD_SIZE)
+              .boxed().map(c -> IntStream.range(0, BOARD_SIZE)
+              .boxed().map(r-> new Square(c, r)).toArray(Square[]::new)).toArray(Square[][]::new);
+    }
+    return squares[column][row];
   }
 
   @Override
   public String toString() {
-    String sb = String.valueOf('a' + column) +
-        ('1' + row);
+    String sb = String.valueOf((char)('a' + column)) +
+        ((char)('1' + row));
     return sb;
   }
 
-  public boolean validateLimits() {
+  public static boolean validateLimits(int column, int row) {
     return (
         (column >= 0) &&
             (column < BOARD_SIZE) &&
@@ -52,8 +73,4 @@ public class Square {
         row == square.row;
   }
 
-  @Override
-  public int hashCode() {
-    return com.google.common.base.Objects.hashCode(column, row);
-  }
 }

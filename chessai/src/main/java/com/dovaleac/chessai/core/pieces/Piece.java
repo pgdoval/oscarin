@@ -78,12 +78,6 @@ public abstract class Piece {
     return new Pawn(square, color);
   }
 
-  public Piece move(Square square) {
-    return move(square, null);
-  }
-
-  public abstract Piece move(Square square, Figure figureToCrown);
-
   public Figure getFigure() {
     return figure;
   }
@@ -105,7 +99,7 @@ public abstract class Piece {
   }
 
   public List<Move> getPossibleMoves(Position position) {
-    return figure.getMoveCalculator().calculateMoves(position, square, this);
+    return figure.getMoveCalculator().calculateMoves(position, this);
   }
 
   public boolean isAttacking(Position position, Square targetSquare) {

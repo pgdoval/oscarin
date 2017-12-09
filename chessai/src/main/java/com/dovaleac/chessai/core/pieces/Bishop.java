@@ -7,9 +7,4 @@ public class Bishop extends Piece {
   Bishop(Square square, Color color) {
     super(Figure.BISHOP, square, color);
   }
-
-  @Override
-  public Piece move(Square square, Figure figureToCrown) {
-
-  }
 }

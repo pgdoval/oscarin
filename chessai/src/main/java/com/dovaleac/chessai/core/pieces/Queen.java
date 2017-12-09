@@ -7,9 +7,4 @@ public class Queen extends Piece {
   Queen(Square square, Color color) {
     super(Figure.QUEEN, square, color);
   }
-
-  @Override
-  public Piece move(Square square, Figure figureToCrown) {
-
-  }
 }
