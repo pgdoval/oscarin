@@ -181,6 +181,10 @@ public class Move {
 
       //Remove captured piece
       Piece pieceToRemove = piecesBySquare.get(move.getTargetSquare());
+
+      piecesBySquare.remove(pieceToCopy.getSquare());
+      piecesBySquare.put(pieceToUpdate.getSquare(), pieceToUpdate);
+
       if (pieceToRemove != null) {
         piecesByColor
             .get(pieceToRemove.getColor())
