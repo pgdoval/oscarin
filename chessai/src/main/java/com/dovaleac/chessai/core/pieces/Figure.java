@@ -28,6 +28,9 @@ public enum Figure {
     return moveCalculator;
   }
 
+  public static Figure [] queeningTransformations() {
+    return new Figure[]{QUEEN, ROOK, BISHOP, KNIGHT};
+  }
   public static Figure byRepresentation(char c) {
     switch (c) {
       case 'K': return KING;

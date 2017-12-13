@@ -1,5 +1,11 @@
 package com.dovaleac.chessai.core;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public class PositionStatus {
   private final boolean whiteCanCastleKingside;
   private final boolean whiteCanCastleQueenside;
@@ -41,6 +47,21 @@ public class PositionStatus {
     return new PositionStatus(true, true,
         true, true, -2);
   }
+
+  public static PositionStatus fromString(String status) {
+
+    if (status.isEmpty()) {
+      return initialStatus();
+    }
+
+    List<Boolean> castlings = Arrays.stream(status.substring(0, 4).split(""))
+        .map(c -> Objects.equals(c, "t"))
+        .collect(Collectors.toList());
+    int enPassant = Integer.valueOf(status.substring(4));
+    return new PositionStatus(castlings.get(0), castlings.get(1),
+        castlings.get(2), castlings.get(3), enPassant);
+  }
+
 
   public static Builder builder(PositionStatus previousPosition) {
     return new Builder(previousPosition);

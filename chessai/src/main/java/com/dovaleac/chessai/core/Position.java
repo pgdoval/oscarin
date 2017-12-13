@@ -104,7 +104,7 @@ public class Position {
     return piecesByColor.get(color);
   }
 
-  private class PositionRewritingInfo {
+  class PositionRewritingInfo {
     private final Move move;
     private final PositionStatus status;
 

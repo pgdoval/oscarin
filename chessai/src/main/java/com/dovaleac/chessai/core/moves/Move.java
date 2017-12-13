@@ -50,11 +50,20 @@ public class Move {
   }
 
   public static Move simple(Piece piece, Square square) {
-    return new Move(new PieceMove(piece, square), null, null);
+    return simple(piece, square, false);
+  }
+
+  public static Move simple(Piece piece, Square square, boolean isCrowning) {
+    return new Move(new PieceMove(piece, square, isCrowning), null, null);
   }
 
   public static Move capture(Piece piece, Square square, Figure capturedFigure) {
-    return new Move(new PieceMove(piece, square), null, capturedFigure);
+    return capture(piece, square, capturedFigure, false);
+  }
+
+  public static Move capture(Piece piece, Square square, Figure capturedFigure,
+                             boolean isCrowning) {
+    return new Move(new PieceMove(piece, square, isCrowning), null, capturedFigure);
   }
 
   public static Move fromNotation(Position position, String notation) {
@@ -102,13 +111,22 @@ public class Move {
 
     StringBuilder sb = new StringBuilder(7);
 
-    sb.append(mainMove.getPiece().toString());
+    if (mainMove.isCrowning())
+    {
+      sb.append(mainMove.getPiece().getSquare().toString());
+    } else {
+      sb.append(mainMove.getPiece().toString());
+    }
 
     if (capture) {
       sb.append('x');
     }
     sb.append(mainMove.getTargetSquare().toString());
-    //queening is missing yet
+
+    if (mainMove.isCrowning()) {
+      sb.append("=");
+      sb.append(mainMove.getPiece().getFigure().getRepresentation());
+    }
     return sb.toString();
   }
 

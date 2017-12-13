@@ -158,7 +158,7 @@ public abstract class MoveCalculator {
       }
 
       //Left capture
-      if ((c > 0) && (r > 0) && (r < 7)) {
+      if ((c > 0) && (r > 0) && (r < 7) && (r != (isWhite ? 6 : 1))) {
         Move capture = capture(position, piece, c - 1, isWhite ? r + 1 : r - 1);
         if (capture != null) {
           result.add(capture);
@@ -166,7 +166,7 @@ public abstract class MoveCalculator {
       }
 
       //Right capture
-      if ((c < 7) && (r > 0) && (r < 7)) {
+      if ((c < 7) && (r > 0) && (r < 7) && (r != (isWhite ? 6 : 1))) {
         Move capture = capture(position, piece, c + 1, isWhite ? r + 1 : r - 1);
         if (capture != null) {
           result.add(capture);
@@ -229,9 +229,9 @@ public abstract class MoveCalculator {
       if (candidateSquare != null
           && !position.isSquareOccupiedByMovingColor(candidateSquare)
           && !position.isSquareOccupiedByOppositeColor(candidateSquare)) {
-        return Stream.of(Figure.values())
+        return Stream.of(Figure.queeningTransformations())
             .map(figure -> Move.simple(
-                Piece.of(figure, piece.getSquare(), piece.getColor()), candidateSquare))
+                Piece.of(figure, piece.getSquare(), piece.getColor()), candidateSquare, true))
             .collect(Collectors.toList());
       }
       return new ArrayList<>(0);
@@ -244,10 +244,10 @@ public abstract class MoveCalculator {
 
       capturedPiece = position.getPieceInSquare(candidateSquare);
       if (capturedPiece != null && capturedPiece.getColor() != piece.getColor()) {
-        return Stream.of(Figure.values())
+        return Stream.of(Figure.queeningTransformations())
             .map(figure -> Move.capture(
                 Piece.of(figure, piece.getSquare(), piece.getColor())
-                , candidateSquare, capturedPiece.getFigure()))
+                , candidateSquare, capturedPiece.getFigure(), true))
             .collect(Collectors.toList());
       }
       return new ArrayList<>(0);
