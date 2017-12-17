@@ -9,7 +9,7 @@ public enum SimplePositionalFact implements PositionalFact {
   KNIGHT_IS_GUARDING_KING (PositionalFactType.KNIGHT_IS_GUARDING_KING),
   QUEEN_IS_NEAR_KING (PositionalFactType.QUEEN_IS_NEAR_KING),
 
-  BISHOP_COUPLE (PositionalFactType.IS_KING_IN_MIDDLE_COLUMNS);
+  BISHOP_COUPLE (PositionalFactType.BISHOP_COUPLE);
 
   private PositionalFactType type;
   SimplePositionalFact(PositionalFactType type) {

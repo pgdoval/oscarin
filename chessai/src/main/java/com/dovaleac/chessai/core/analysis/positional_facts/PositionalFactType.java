@@ -14,11 +14,10 @@ public enum PositionalFactType {
   NUMBER_OF_ISLANDS (101),
   DOUBLED_PAWNS (102),
   LATE_PAWN (103),
-  LATE_PAWN_IN_SEMIOPEN_COLUMN (104),
-  ISOLATED_PAWN (105),
-  PASSED_PAWN (106),
-  PASSED_PROTECTED_PAWN (107),
-  PASSED_PAWN_COUPLE (108),
+  ISOLATED_PAWN (104),
+  PASSED_PAWN (105),
+  PASSED_PROTECTED_PAWN (106),
+  PASSED_PAWN_COUPLE (107),
 
   //piece quality
   NUMBER_OF_SQUARES_A_QUEEN_CAN_MOVE (201),
@@ -37,6 +36,8 @@ public enum PositionalFactType {
   //open lines
   ROOK_CONTROLS_OPEN_COLUMN (301),
   UNCONTROLLED_OPEN_COLUMN (302);
+
+  //4xx - center type
 
   private int id;
   PositionalFactType(int i) {
