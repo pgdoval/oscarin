@@ -23,6 +23,14 @@ public class Move {
     this.capturedFigure = capturedFigure;
   }
 
+  public Piece resultingPiece(Position position) {
+    if (secondaryMove != null) {
+      return null;
+    }
+
+    return position.getPieceInSquare(mainMove.getTargetSquare());
+  }
+
   public static Move castling(Side side, Color colorToMove) {
     int kingInitial = 4;
     int kingFinal;
@@ -132,6 +140,10 @@ public class Move {
 
   public Figure getCapturedFigure() {
     return capturedFigure;
+  }
+
+  public Figure getFigure() {
+    return mainMove.getPiece().getFigure();
   }
 
   public Square getTargetSquare() {

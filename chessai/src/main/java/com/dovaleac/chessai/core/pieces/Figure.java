@@ -31,6 +31,12 @@ public enum Figure {
   public static Figure [] queeningTransformations() {
     return new Figure[]{QUEEN, ROOK, BISHOP, KNIGHT};
   }
+
+  public static Figure [] rangeFigures() {
+    return new Figure[]{QUEEN, ROOK, BISHOP};
+  }
+
+
   public static Figure byRepresentation(char c) {
     switch (c) {
       case 'K': return KING;

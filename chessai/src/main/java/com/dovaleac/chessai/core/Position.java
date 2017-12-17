@@ -57,6 +57,13 @@ public class Position {
     return this;
   }
 
+  public PositionRewritingInfo getLastMove() {
+    if (moves.isEmpty()) {
+      return null;
+    } else {
+      return moves.peek();
+    }
+  }
 
   public boolean isSquareOccupiedByMovingColor(Square square) {
     Piece piece = occupyingPiece(square);
@@ -104,7 +111,7 @@ public class Position {
     return piecesByColor.get(color);
   }
 
-  class PositionRewritingInfo {
+  public class PositionRewritingInfo {
     private final Move move;
     private final PositionStatus status;
 
