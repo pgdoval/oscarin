@@ -5,10 +5,10 @@ public enum PositionalFactType {
   IS_KING_IN_MIDDLE_COLUMNS (1),
   IS_KING_IN_MIDDLE_ROWS (2),
   ARE_PROTECTING_PAWNS_IN_LINE (3),
-  IS_THERE_A_GOOD_FIANCHETTO (4),
-  ARE_THERE_OPEN_LINES_TOWARDS_THE_KING (5),
-  KNIGHT_IS_GUARDING_KING (6),
-  QUEEN_IS_NEAR_KING (7),
+  IS_THERE_A_GOOD_FIANCHETTO (4), //study in the future
+  ARE_THERE_OPEN_LINES_TOWARDS_THE_KING (5), //study in the future
+  OWN_PIECE_NEAR_KING (6),
+  ENEMY_PIECE_NEAR_KING (7),
 
   //the pawn structure will be removed from here
   NUMBER_OF_ISLANDS (101),
@@ -35,7 +35,7 @@ public enum PositionalFactType {
 
   //open lines
   ROOK_CONTROLS_OPEN_COLUMN (301),
-  UNCONTROLLED_OPEN_COLUMN (302);
+  OPEN_COLUMN (302);
 
   //4xx - center type
 

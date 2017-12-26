@@ -23,13 +23,13 @@ public class AbstractPieceListPositionalFact implements PositionalFact{
     return pieces;
   }
 
-  public class DoubledPawns extends AbstractPieceListPositionalFact {
+  public static class DoubledPawns extends AbstractPieceListPositionalFact {
     public DoubledPawns(List<Piece> pieces) {
       super(pieces, PositionalFactType.DOUBLED_PAWNS);
     }
   }
 
-  public class PassedPawnCouple extends AbstractPieceListPositionalFact {
+  public static class PassedPawnCouple extends AbstractPieceListPositionalFact {
     public PassedPawnCouple(List<Piece> pieces) {
       super(pieces, PositionalFactType.PASSED_PAWN_COUPLE);
     }
