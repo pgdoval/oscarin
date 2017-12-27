@@ -25,11 +25,10 @@ import java.util.stream.Stream;
 
 public class KingSafetyAnalyzer implements PositionAnalyzer {
   @Override
-  public Set<PositionalFact> analyze(Set<PositionalFact> facts, Position position)
+  public Stream<PositionalFact> analyze(Position position)
       throws NoKingPresentException {
 
-    facts.addAll(
-        Stream.of(Color.values())
+    return Stream.of(Color.values())
             .map(color -> {
               try {
                 return analyzeSide(color, position);
@@ -38,10 +37,7 @@ public class KingSafetyAnalyzer implements PositionAnalyzer {
               }
             })
             .filter(Objects::nonNull)
-            .flatMap(Collection::stream)
-            .collect(Collectors.toList())
-    );
-    return facts;
+            .flatMap(Collection::stream);
   }
 
   private List<PositionalFact> analyzeSide(Color color, Position position)

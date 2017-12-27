@@ -27,25 +27,25 @@ public class AbstractNumberAndPiecePositionalFact implements PositionalFact {
     return piece;
   }
 
-  public class NumberOfSquaresQueenCanReach extends AbstractNumberAndPiecePositionalFact {
+  public static class NumberOfSquaresQueenCanReach extends AbstractNumberAndPiecePositionalFact {
 
     public NumberOfSquaresQueenCanReach(int number, Piece piece) {
       super(PositionalFactType.NUMBER_OF_SQUARES_A_QUEEN_CAN_MOVE, number, piece);
     }
   }
-  public class NumberOfSquaresRookCanReach extends AbstractNumberAndPiecePositionalFact {
+  public static class NumberOfSquaresRookCanReach extends AbstractNumberAndPiecePositionalFact {
 
     public NumberOfSquaresRookCanReach(int number, Piece piece) {
       super(PositionalFactType.NUMBER_OF_SQUARES_A_ROOK_CAN_MOVE, number, piece);
     }
   }
-  public class NumberOfSquaresBishopCanReach extends AbstractNumberAndPiecePositionalFact {
+  public static class NumberOfSquaresBishopCanReach extends AbstractNumberAndPiecePositionalFact {
 
     public NumberOfSquaresBishopCanReach(int number, Piece piece) {
       super(PositionalFactType.NUMBER_OF_SQUARES_A_BISHOP_CAN_MOVE, number, piece);
     }
   }
-  public class NumberOfSquaresKnightCanReach extends AbstractNumberAndPiecePositionalFact {
+  public static class NumberOfSquaresKnightCanReach extends AbstractNumberAndPiecePositionalFact {
 
     public NumberOfSquaresKnightCanReach(int number, Piece piece) {
       super(PositionalFactType.NUMBER_OF_SQUARES_A_KNIGHT_CAN_MOVE, number, piece);

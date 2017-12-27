@@ -16,38 +16,36 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class PawnStructureAnalyzer implements PositionAnalyzer {
   @Override
-  public Set<PositionalFact> analyze(Set<PositionalFact> facts, Position position) {
+  public Stream<PositionalFact> analyze(Position position) {
 
     Map<Integer, List<Square>> whitePawns = getPawnsOfColor(position, Color.WHITE);
     Map<Integer, List<Square>> blackPawns = getPawnsOfColor(position, Color.BLACK);
 
-    List<PositionalFact> whiteColumns = checkSemiOpenColumns(whitePawns, Color.WHITE);
-    List<PositionalFact> blackColumns = checkSemiOpenColumns(blackPawns, Color.BLACK);
+    Stream<PositionalFact> whiteColumns = checkSemiOpenColumns(whitePawns, Color.WHITE);
+    Stream<PositionalFact> blackColumns = checkSemiOpenColumns(blackPawns, Color.BLACK);
 
-    List<PositionalFact> whiteDoubledPawns = checkDoubledPawns(whitePawns, position);
-    List<PositionalFact> blackDoubledPawns = checkDoubledPawns(blackPawns, position);
+    Stream<PositionalFact> whiteDoubledPawns = checkDoubledPawns(whitePawns, position);
+    Stream<PositionalFact> blackDoubledPawns = checkDoubledPawns(blackPawns, position);
 
-    List<PositionalFact> whitePawnIslands = checkPawnIslands(whitePawns, Color.WHITE, position);
-    List<PositionalFact> blackPawnIslands = checkPawnIslands(blackPawns, Color.BLACK, position);
+    Stream<PositionalFact> whitePawnIslands = checkPawnIslands(whitePawns, Color.WHITE, position);
+    Stream<PositionalFact> blackPawnIslands = checkPawnIslands(blackPawns, Color.BLACK, position);
 
-    List<PositionalFact> whitePassedPawns = checkPassedPawns(whitePawns, blackPawns, Color.WHITE, position);
-    List<PositionalFact> blackPassedPawns = checkPassedPawns(blackPawns, whitePawns, Color.WHITE, position);
+    Stream<PositionalFact> whitePassedPawns = checkPassedPawns(whitePawns, blackPawns, Color.WHITE, position);
+    Stream<PositionalFact> blackPassedPawns = checkPassedPawns(blackPawns, whitePawns, Color.WHITE, position);
 
-    List<PositionalFact> whiteLatePawns = checkLatePawns(whitePawns, Color.WHITE, position);
-    List<PositionalFact> blackLatePawns = checkLatePawns(blackPawns, Color.WHITE, position);
+    Stream<PositionalFact> whiteLatePawns = checkLatePawns(whitePawns, Color.WHITE, position);
+    Stream<PositionalFact> blackLatePawns = checkLatePawns(blackPawns, Color.WHITE, position);
 
-    List<PositionalFact> addendum = Stream.of(whiteColumns, blackColumns, whiteDoubledPawns,
+    return Stream.of(whiteColumns, blackColumns, whiteDoubledPawns,
         blackDoubledPawns, whitePawnIslands, blackPawnIslands, whitePassedPawns, blackPassedPawns,
-        whiteLatePawns, blackLatePawns).flatMap(Collection::stream).collect(Collectors.toList());
-
-    facts.addAll(addendum);
-    return facts;
+        whiteLatePawns, blackLatePawns).flatMap(st -> st);
   }
 
   private Map<Integer, List<Square>> getPawnsOfColor(Position position, Color color) {
@@ -57,27 +55,25 @@ public class PawnStructureAnalyzer implements PositionAnalyzer {
         .collect(Collectors.groupingBy(Square::getColumn));
   }
 
-  private List<PositionalFact> checkSemiOpenColumns(Map<Integer, List<Square>> pawns,
-                                                    Color color) {
+  private Stream<PositionalFact> checkSemiOpenColumns(Map<Integer, List<Square>> pawns,
+                                                      Color color) {
     return IntStream.range(0,7).boxed()
         .filter(column -> pawns.get(column) == null)
         .map(column ->
-            new AbstractNumberAndColorPositionalFact.OpenOrSemiopenColumn(column, color))
-        .collect(Collectors.toList());
+            new AbstractNumberAndColorPositionalFact.OpenOrSemiopenColumn(column, color));
   }
 
-  private List<PositionalFact> checkDoubledPawns(Map<Integer, List<Square>> pawns,
-                                                 Position position) {
+  private Stream<PositionalFact> checkDoubledPawns(Map<Integer, List<Square>> pawns,
+                                                   Position position) {
     return pawns.values().stream()
         .filter(pawnsInColumn -> pawnsInColumn.size() > 1)
         .map(squares -> squares.stream()
             .map(position::getPieceInSquare).collect(Collectors.toList()))
-        .map(AbstractPieceListPositionalFact.DoubledPawns::new)
-        .collect(Collectors.toList());
+        .map(AbstractPieceListPositionalFact.DoubledPawns::new);
   }
 
-  private List<PositionalFact> checkPawnIslands(Map<Integer, List<Square>> pawns,
-                                                Color color, Position position) {
+  private Stream<PositionalFact> checkPawnIslands(Map<Integer, List<Square>> pawns,
+                                                  Color color, Position position) {
     List<List<Integer>> islands = new ArrayList<>(4);
     List<Integer> currentIsland = new ArrayList<>(8);
     List<Square> pawnsInColumn;
@@ -106,12 +102,12 @@ public class PawnStructureAnalyzer implements PositionAnalyzer {
       }
     });
 
-    return result;
+    return result.stream();
 
   }
 
-  private List<PositionalFact> checkLatePawns(Map<Integer, List<Square>> pawns,
-                                              Color color, Position position) {
+  private Stream<PositionalFact> checkLatePawns(Map<Integer, List<Square>> pawns,
+                                                Color color, Position position) {
     List<PositionalFact> result = new ArrayList<>();
     List<Square> pawnsInColumn;
     List<Square> pawnsInRightColumn;
@@ -141,7 +137,7 @@ public class PawnStructureAnalyzer implements PositionAnalyzer {
       }
     }
 
-    return result;
+    return result.stream();
   }
 
   private boolean allowsForLatePawn(Square leftSquare, Square square, boolean isWhite) {
@@ -149,10 +145,10 @@ public class PawnStructureAnalyzer implements PositionAnalyzer {
     return (isWhite && rowDiff >=0) || (!isWhite && rowDiff <=0);
   }
 
-  private List<PositionalFact> checkPassedPawns(Map<Integer, List<Square>> pawns,
-                                                Map<Integer, List<Square>> rivalPawns,
-                                                Color color,
-                                                Position position) {
+  private Stream<PositionalFact> checkPassedPawns(Map<Integer, List<Square>> pawns,
+                                                  Map<Integer, List<Square>> rivalPawns,
+                                                  Color color,
+                                                  Position position) {
     List<PositionalFact> result = new ArrayList<>();
     boolean isWhite = color == Color.WHITE;
 
@@ -160,7 +156,8 @@ public class PawnStructureAnalyzer implements PositionAnalyzer {
         .map(Map.Entry::getValue)
         .flatMap(Collection::stream)
         .filter(square ->
-            pawnsLetFreeWayToCrown(square, rivalPawns.get(square.getColumn() - 1), isWhite))
+            pawnsLetFreeWayToCrown(square, rivalPawns.get(square.getColumn() - 1), isWhite)
+                && pawnsLetFreeWayToCrown(square, rivalPawns.get(square.getColumn() + 1), isWhite))
         .collect(Collectors.toList());
 
     passedPawns.forEach(square -> {
@@ -175,15 +172,15 @@ public class PawnStructureAnalyzer implements PositionAnalyzer {
           .findAny();
       rightPassedPawn.ifPresent(rightSquare ->
           result.add(new AbstractPieceListPositionalFact.PassedPawnCouple(
-              Stream.of(square, rightSquare)
-              .map(position::getPieceInSquare)
-              .collect(Collectors.toList())
-          )
+                  Stream.of(square, rightSquare)
+                      .map(position::getPieceInSquare)
+                      .collect(Collectors.toList())
+              )
           )
       );
     });
 
-    return result;
+    return result.stream();
   }
 
   private boolean checkIsProtected(List<Square> candidatePawns, boolean isWhite, Square square) {
