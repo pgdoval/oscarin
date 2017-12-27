@@ -15,11 +15,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static com.dovaleac.chessai.core.analysis.positional_facts.AbstractNumberAndColorPositionalFact.*;
 
 public class PawnStructureAnalyzer implements PositionAnalyzer {
   @Override
@@ -28,8 +28,17 @@ public class PawnStructureAnalyzer implements PositionAnalyzer {
     Map<Integer, List<Square>> whitePawns = getPawnsOfColor(position, Color.WHITE);
     Map<Integer, List<Square>> blackPawns = getPawnsOfColor(position, Color.BLACK);
 
-    Stream<PositionalFact> whiteColumns = checkSemiOpenColumns(whitePawns, Color.WHITE);
-    Stream<PositionalFact> blackColumns = checkSemiOpenColumns(blackPawns, Color.BLACK);
+    List<OpenOrSemiopenColumn> whiteColumns = checkSemiOpenColumns(whitePawns, Color.WHITE)
+        .collect(Collectors.toList());
+    List<OpenOrSemiopenColumn> blackColumns = checkSemiOpenColumns(blackPawns, Color.BLACK)
+        .collect(Collectors.toList());
+
+    Stream<PositionalFact> whiteRooksInColumn = checkRooksInSemiOpenColumns(whiteColumns,
+        position.getPiecesByColor(Color.WHITE));
+
+    Stream<PositionalFact> blackRooksInColumn = checkRooksInSemiOpenColumns(blackColumns,
+        position.getPiecesByColor(Color.BLACK));
+
 
     Stream<PositionalFact> whiteDoubledPawns = checkDoubledPawns(whitePawns, position);
     Stream<PositionalFact> blackDoubledPawns = checkDoubledPawns(blackPawns, position);
@@ -43,9 +52,10 @@ public class PawnStructureAnalyzer implements PositionAnalyzer {
     Stream<PositionalFact> whiteLatePawns = checkLatePawns(whitePawns, Color.WHITE, position);
     Stream<PositionalFact> blackLatePawns = checkLatePawns(blackPawns, Color.WHITE, position);
 
-    return Stream.of(whiteColumns, blackColumns, whiteDoubledPawns,
-        blackDoubledPawns, whitePawnIslands, blackPawnIslands, whitePassedPawns, blackPassedPawns,
-        whiteLatePawns, blackLatePawns).flatMap(st -> st);
+    return Stream.of(whiteColumns.stream(), blackColumns.stream(), whiteRooksInColumn,
+        blackRooksInColumn, whiteDoubledPawns, blackDoubledPawns, whitePawnIslands,
+        blackPawnIslands, whitePassedPawns, blackPassedPawns, whiteLatePawns, blackLatePawns)
+        .flatMap(st -> st);
   }
 
   private Map<Integer, List<Square>> getPawnsOfColor(Position position, Color color) {
@@ -55,12 +65,26 @@ public class PawnStructureAnalyzer implements PositionAnalyzer {
         .collect(Collectors.groupingBy(Square::getColumn));
   }
 
-  private Stream<PositionalFact> checkSemiOpenColumns(Map<Integer, List<Square>> pawns,
-                                                      Color color) {
+  private Stream<OpenOrSemiopenColumn> checkSemiOpenColumns(Map<Integer, List<Square>> pawns,
+                                                            Color color) {
     return IntStream.range(0,7).boxed()
         .filter(column -> pawns.get(column) == null)
         .map(column ->
             new AbstractNumberAndColorPositionalFact.OpenOrSemiopenColumn(column, color));
+  }
+
+  private Stream<PositionalFact> checkRooksInSemiOpenColumns(
+      List<OpenOrSemiopenColumn> openColumns, List<Piece> pieces) {
+    return checkRookInSemiOpenColumn(openColumns.stream()
+        .map(AbstractNumberAndColorPositionalFact::getNumber)
+    .collect(Collectors.toList()), pieces);
+  }
+
+  private Stream<PositionalFact> checkRookInSemiOpenColumn(List<Integer> openColumns, List<Piece> pieces) {
+    return pieces.stream()
+        .filter(piece -> piece.getFigure() == Figure.ROOK)
+        .filter(piece -> openColumns.contains(piece.getSquare().getColumn()))
+        .map(AbstractOnePiecePositionalFact.RookControlsOpenColumn::new);
   }
 
   private Stream<PositionalFact> checkDoubledPawns(Map<Integer, List<Square>> pawns,
