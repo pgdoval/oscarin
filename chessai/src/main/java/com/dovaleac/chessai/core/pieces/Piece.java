@@ -107,4 +107,31 @@ public abstract class Piece {
   }
 
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    Piece piece = (Piece) o;
+
+    if (figure != piece.figure) {
+      return false;
+    }
+    if (square != null ? !square.equals(piece.square) : piece.square != null) {
+      return false;
+    }
+    return color == piece.color;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = figure != null ? figure.hashCode() : 0;
+    result = 31 * result + (square != null ? square.hashCode() : 0);
+    result = 31 * result + (color != null ? color.hashCode() : 0);
+    return result;
+  }
 }

@@ -19,6 +19,34 @@ public class AbstractSquareListAndPiecePositionalFact implements PositionalFact{
   }
 
   @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    AbstractSquareListAndPiecePositionalFact that = (AbstractSquareListAndPiecePositionalFact) o;
+
+    if (squares != null ? !squares.equals(that.squares) : that.squares != null) {
+      return false;
+    }
+    if (piece != null ? !piece.equals(that.piece) : that.piece != null) {
+      return false;
+    }
+    return factType == that.factType;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = squares != null ? squares.hashCode() : 0;
+    result = 31 * result + (piece != null ? piece.hashCode() : 0);
+    result = 31 * result + (factType != null ? factType.hashCode() : 0);
+    return result;
+  }
+
+  @Override
   public PositionalFactType getFactType() {
     return factType;
   }

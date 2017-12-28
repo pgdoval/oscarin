@@ -27,6 +27,34 @@ public class AbstractNumberAndPiecePositionalFact implements PositionalFact {
     return piece;
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    AbstractNumberAndPiecePositionalFact that = (AbstractNumberAndPiecePositionalFact) o;
+
+    if (number != that.number) {
+      return false;
+    }
+    if (type != that.type) {
+      return false;
+    }
+    return piece != null ? piece.equals(that.piece) : that.piece == null;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = type != null ? type.hashCode() : 0;
+    result = 31 * result + number;
+    result = 31 * result + (piece != null ? piece.hashCode() : 0);
+    return result;
+  }
+
   public static class NumberOfSquaresQueenCanReach extends AbstractNumberAndPiecePositionalFact {
 
     public NumberOfSquaresQueenCanReach(int number, Piece piece) {

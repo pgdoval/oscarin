@@ -133,31 +133,31 @@ public class PawnStructureAnalyzer implements PositionAnalyzer {
   private Stream<PositionalFact> checkLatePawns(Map<Integer, List<Square>> pawns,
                                                 Color color, Position position) {
     List<PositionalFact> result = new ArrayList<>();
-    List<Square> pawnsInColumn;
-    List<Square> pawnsInRightColumn;
-    List<Square> pawnsInLeftColumn;
 
     boolean isWhite = color == Color.WHITE;
 
     for (int i = 0; i < 8; i++) {
+      List<Square> pawnsInColumn;
       pawnsInColumn = pawns.get(i);
 
       if (pawnsInColumn != null) {
-        pawnsInLeftColumn = pawns.get(i - 1);
-        pawnsInRightColumn = pawns.get(i + 1);
+        final List<Square> pawnsInLeftColumn = pawns.get(i - 1);
+        final List<Square> pawnsInRightColumn = pawns.get(i + 1);
 
         if (pawnsInLeftColumn == null && pawnsInRightColumn == null) {
           continue;
         }
 
-        result.addAll(pawnsInColumn.stream()
+        List<AbstractOnePiecePositionalFact.LatePawn> latePawns = pawnsInColumn.stream()
             .filter(square -> pawnsInLeftColumn == null || pawnsInLeftColumn.stream().allMatch(
                 leftSquare -> allowsForLatePawn(leftSquare, square, isWhite)))
             .filter(square -> pawnsInRightColumn == null || pawnsInRightColumn.stream().allMatch(
                 rightSquare -> allowsForLatePawn(rightSquare, square, isWhite)))
             .map(position::getPieceInSquare)
             .map(AbstractOnePiecePositionalFact.LatePawn::new)
-            .collect(Collectors.toList()));
+            .collect(Collectors.toList());
+
+        result.addAll(latePawns);
       }
     }
 

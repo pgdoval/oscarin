@@ -15,6 +15,34 @@ public class AbstractNumberAndColorPositionalFact implements PositionalFact {
   }
 
   @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    AbstractNumberAndColorPositionalFact that = (AbstractNumberAndColorPositionalFact) o;
+
+    if (number != that.number) {
+      return false;
+    }
+    if (type != that.type) {
+      return false;
+    }
+    return color == that.color;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = type != null ? type.hashCode() : 0;
+    result = 31 * result + number;
+    result = 31 * result + (color != null ? color.hashCode() : 0);
+    return result;
+  }
+
+  @Override
   public PositionalFactType getFactType() {
     return type;
   }

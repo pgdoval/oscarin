@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -87,15 +88,16 @@ public class PieceQualityAnalyzer implements PositionAnalyzer {
   }
 
   private boolean isOutpost (Square square, boolean isWhite, Color enemyColor, Position position) {
-    IntStream rows = isWhite
+    Supplier<IntStream> rows = () -> isWhite
         ? IntStream.range(square.getRow() + 1, 7)
         : IntStream.range(0, square.getRow() - 1);
 
     return IntStream.of(square.getColumn() - 1, square.getColumn() + 1)
         .boxed()
-        .flatMap(column -> rows.boxed().map(row -> Square.of(column, row)))
+        .flatMap(column -> rows.get().boxed().map(row -> Square.of(column, row)))
         .map(position::getPieceInSquare)
         .filter(Objects::nonNull)
+        .filter(piece -> piece.getFigure() == Figure.PAWN)
         .noneMatch(piece -> piece.getColor() == enemyColor);
   }
 }
