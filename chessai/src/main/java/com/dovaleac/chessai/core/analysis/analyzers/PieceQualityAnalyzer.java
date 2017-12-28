@@ -2,6 +2,7 @@ package com.dovaleac.chessai.core.analysis.analyzers;
 
 import com.dovaleac.chessai.core.Color;
 import com.dovaleac.chessai.core.Position;
+import com.dovaleac.chessai.core.analysis.positional_facts.AbstractColorPositionalFact;
 import com.dovaleac.chessai.core.analysis.positional_facts.AbstractNumberAndPiecePositionalFact;
 import com.dovaleac.chessai.core.analysis.positional_facts.AbstractOnePiecePositionalFact;
 import com.dovaleac.chessai.core.analysis.positional_facts.PositionalFact;
@@ -40,14 +41,30 @@ public class PieceQualityAnalyzer implements PositionAnalyzer {
   private List<PositionalFact> analyzeSide(Color color, Position position)
       throws NoKingPresentException {
     List<Piece> ownPieces = position.getPiecesByColor(color);
+    List<Piece> enemyPieces = position.getPiecesByColor(color.flip());
+
     boolean isWhite = color == Color.WHITE;
     Color enemyColor = color.flip();
 
-    return ownPieces.stream()
+    List<PositionalFact> facts = new ArrayList<>();
+    long ownBishops = ownPieces.stream()
+        .filter(piece -> piece.getFigure() == Figure.BISHOP).count();
+    long enemyBishops = enemyPieces.stream()
+        .filter(piece -> piece.getFigure() == Figure.BISHOP).count();
+
+
+    if (ownBishops == 2 && enemyBishops < 2) {
+      facts.add(new AbstractColorPositionalFact.BishopCouple(color));
+    }
+
+    if (ownBishops < 2 && enemyBishops == 2) {
+      facts.add(new AbstractColorPositionalFact.BishopCouple(color.flip()));
+    }
+
+    ownPieces.stream()
         .filter(piece -> piece.getFigure() != Figure.PAWN)
         .filter(piece -> piece.getFigure() != Figure.KING)
-        .map(piece -> {
-          List<PositionalFact> facts = new ArrayList<>();
+        .forEach(piece -> {
 
           switch (piece.getFigure()) {
             case QUEEN:
@@ -80,11 +97,9 @@ public class PieceQualityAnalyzer implements PositionAnalyzer {
                 facts.add(new AbstractOnePiecePositionalFact.KnightIsInOutpost(piece));
               }
           }
+        });
 
-          return facts;
-        })
-        .flatMap(Collection::stream)
-        .collect(Collectors.toList());
+    return facts;
   }
 
   private boolean isOutpost (Square square, boolean isWhite, Color enemyColor, Position position) {

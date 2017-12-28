@@ -3,6 +3,7 @@ package com.dovaleac.chessai.core.analysis.analyzers;
 import com.dovaleac.chessai.core.Color;
 import com.dovaleac.chessai.core.Position;
 import com.dovaleac.chessai.core.PositionFactory;
+import com.dovaleac.chessai.core.analysis.positional_facts.AbstractColorPositionalFact;
 import com.dovaleac.chessai.core.analysis.positional_facts.AbstractNumberAndPiecePositionalFact;
 import com.dovaleac.chessai.core.analysis.positional_facts.AbstractOnePiecePositionalFact;
 import com.dovaleac.chessai.core.analysis.positional_facts.PositionalFact;
@@ -10,23 +11,18 @@ import com.dovaleac.chessai.core.pieces.Piece;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class PieceQualityAnalyzerTest {
 
   PieceQualityAnalyzer analyzer = new PieceQualityAnalyzer();
-
-  @BeforeEach
-  void setUp() {
-  }
-
-  @AfterEach
-  void tearDown() {
-  }
 
   @Test
   void analyzeOutposts() {
@@ -71,4 +67,33 @@ class PieceQualityAnalyzerTest {
         .count());
   }
 
+  @ParameterizedTest
+  @MethodSource(value = "bnPositions")
+  public void analyzeBishopNumber(String positionString, Color color) {
+    Position position = PositionFactory.fromString(positionString);
+    List<PositionalFact> facts = analyzer.analyze(position).distinct().collect(Collectors.toList());
+
+    facts.forEach(System.out::println);
+    if (color != null) {
+      assertTrue(facts.contains(new AbstractColorPositionalFact.BishopCouple(color)));
+    }
+    assertEquals(color == null ? 0 : 1, facts
+        .stream()
+        .filter(it -> it instanceof AbstractColorPositionalFact.BishopCouple)
+        .count());
+  }
+
+  public static Stream<Object []> bnPositions() {
+    return Stream.of(
+        new Object[]{"Ba3,Ba2,Ke8#Bf4,Kd1##w#", Color.WHITE},
+        new Object[]{"Ba3,Ba2,Ke8#Nf4,Kd1##w#", Color.WHITE},
+        new Object[]{"Ba3,Ke8#Ba2,Bf4,Kd1##w#", Color.BLACK},
+        new Object[]{"Na3,Ke8#Ba2,Bf4,Kd1##w#", Color.BLACK},
+        new Object[]{"Ba3,Ke8#a2,Bf4,Kd1##w#", null},
+        new Object[]{"Ba3,Ke8#a2,f4,Kd1##w#", null},
+        new Object[]{"a3,Ke8#a2,Bf4,Kd1##w#", null},
+        new Object[]{"a3,Ke8#a2,f4,Kd1##w#", null},
+        new Object[]{"Ba3,Ba2,Ke8#Be4,Bf4,Kd1##w#", null}
+        );
+  }
 }
