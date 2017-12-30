@@ -47,10 +47,10 @@ public class PawnStructureAnalyzer implements PositionAnalyzer {
     Stream<PositionalFact> blackPawnIslands = checkPawnIslands(blackPawns, Color.BLACK, position);
 
     Stream<PositionalFact> whitePassedPawns = checkPassedPawns(whitePawns, blackPawns, Color.WHITE, position);
-    Stream<PositionalFact> blackPassedPawns = checkPassedPawns(blackPawns, whitePawns, Color.WHITE, position);
+    Stream<PositionalFact> blackPassedPawns = checkPassedPawns(blackPawns, whitePawns, Color.BLACK, position);
 
     Stream<PositionalFact> whiteLatePawns = checkLatePawns(whitePawns, Color.WHITE, position);
-    Stream<PositionalFact> blackLatePawns = checkLatePawns(blackPawns, Color.WHITE, position);
+    Stream<PositionalFact> blackLatePawns = checkLatePawns(blackPawns, Color.BLACK, position);
 
     return Stream.of(whiteColumns.stream(), blackColumns.stream(), whiteRooksInColumn,
         blackRooksInColumn, whiteDoubledPawns, blackDoubledPawns, whitePawnIslands,
@@ -67,7 +67,7 @@ public class PawnStructureAnalyzer implements PositionAnalyzer {
 
   private Stream<OpenOrSemiopenColumn> checkSemiOpenColumns(Map<Integer, List<Square>> pawns,
                                                             Color color) {
-    return IntStream.range(0,7).boxed()
+    return IntStream.range(0,8).boxed()
         .filter(column -> pawns.get(column) == null)
         .map(column ->
             new AbstractNumberAndColorPositionalFact.OpenOrSemiopenColumn(column, color));
@@ -113,6 +113,10 @@ public class PawnStructureAnalyzer implements PositionAnalyzer {
       } else {
         currentIsland.add(i);
       }
+    }
+
+    if (!currentIsland.isEmpty()) {
+      islands.add(currentIsland);
     }
 
     List<PositionalFact> result = new ArrayList<>();
@@ -181,6 +185,7 @@ public class PawnStructureAnalyzer implements PositionAnalyzer {
         .flatMap(Collection::stream)
         .filter(square ->
             pawnsLetFreeWayToCrown(square, rivalPawns.get(square.getColumn() - 1), isWhite)
+                && pawnsLetFreeWayToCrown(square, rivalPawns.get(square.getColumn()), isWhite)
                 && pawnsLetFreeWayToCrown(square, rivalPawns.get(square.getColumn() + 1), isWhite))
         .collect(Collectors.toList());
 
@@ -213,6 +218,9 @@ public class PawnStructureAnalyzer implements PositionAnalyzer {
   }
 
   private boolean pawnsLetFreeWayToCrown(Square crowningPawn, List<Square> stopper, boolean isWhite) {
+    if (stopper == null) {
+      return true;
+    }
     return stopper
         .stream()
         .allMatch(square -> pawnLetsFreeWayToCrown(crowningPawn, square, isWhite));
@@ -222,7 +230,7 @@ public class PawnStructureAnalyzer implements PositionAnalyzer {
     if (stopper == null) {
       return true;
     }
-    int rowDiff = stopper.getRow() - crowningPawn.getRow();
+    int rowDiff = crowningPawn.getRow() - stopper.getRow();
     return isWhite ? rowDiff >= 0 : rowDiff <= 0;
   }
 

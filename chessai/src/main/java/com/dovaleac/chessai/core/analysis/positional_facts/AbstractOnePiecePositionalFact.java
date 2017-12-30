@@ -45,6 +45,15 @@ public class AbstractOnePiecePositionalFact implements PositionalFact{
     return result;
   }
 
+  @Override
+  public String toString() {
+    final StringBuffer sb = new StringBuffer("AbstractOnePiecePositionalFact{");
+    sb.append("piece=").append(piece);
+    sb.append(", factType=").append(factType);
+    sb.append('}');
+    return sb.toString();
+  }
+
   public static class LatePawn extends AbstractOnePiecePositionalFact {
 
     public LatePawn(Piece piece) {

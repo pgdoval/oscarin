@@ -8,8 +8,6 @@ import com.dovaleac.chessai.core.analysis.positional_facts.AbstractNumberAndPiec
 import com.dovaleac.chessai.core.analysis.positional_facts.AbstractOnePiecePositionalFact;
 import com.dovaleac.chessai.core.analysis.positional_facts.PositionalFact;
 import com.dovaleac.chessai.core.pieces.Piece;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -37,6 +35,21 @@ class PieceQualityAnalyzerTest {
         .stream()
         .filter(it -> it instanceof AbstractOnePiecePositionalFact.KnightIsInOutpost
             || it instanceof AbstractOnePiecePositionalFact.BishopIsInOutpost)
+        .count());
+  }
+
+  @Test
+  void analyzeAdvancedRooks() {
+    Position position = PositionFactory.fromString("Ra1,Rf7,Ke1,Rg8#Ra4,Kb5,Rc8,Rd2##w#");
+    List<PositionalFact> facts = analyzer.analyze(position).collect(Collectors.toList());
+
+    facts.forEach(System.out::println);
+    assertTrue(facts.contains(new AbstractOnePiecePositionalFact.RookIsInSeventhOrEighth(Piece.fromNotation("Rf7", Color.WHITE))));
+    assertTrue(facts.contains(new AbstractOnePiecePositionalFact.RookIsInSeventhOrEighth(Piece.fromNotation("Rg8", Color.WHITE))));
+    assertTrue(facts.contains(new AbstractOnePiecePositionalFact.RookIsInSeventhOrEighth(Piece.fromNotation("Rd2", Color.BLACK))));
+    assertEquals(3, facts
+        .stream()
+        .filter(it -> it instanceof AbstractOnePiecePositionalFact.RookIsInSeventhOrEighth)
         .count());
   }
 

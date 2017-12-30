@@ -50,6 +50,17 @@ public class AbstractThreePiecesPositionalFact implements PositionalFact{
   }
 
   @Override
+  public String toString() {
+    final StringBuffer sb = new StringBuffer("AbstractThreePiecesPositionalFact{");
+    sb.append("piece=").append(piece);
+    sb.append(", piece2=").append(piece2);
+    sb.append(", piece3=").append(piece3);
+    sb.append(", factType=").append(factType);
+    sb.append('}');
+    return sb.toString();
+  }
+
+  @Override
   public PositionalFactType getFactType() {
     return factType;
   }

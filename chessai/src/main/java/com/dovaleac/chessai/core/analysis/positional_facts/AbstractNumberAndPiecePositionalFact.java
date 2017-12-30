@@ -55,6 +55,16 @@ public class AbstractNumberAndPiecePositionalFact implements PositionalFact {
     return result;
   }
 
+  @Override
+  public String toString() {
+    final StringBuffer sb = new StringBuffer("AbstractNumberAndPiecePositionalFact{");
+    sb.append("type=").append(type);
+    sb.append(", number=").append(number);
+    sb.append(", piece=").append(piece);
+    sb.append('}');
+    return sb.toString();
+  }
+
   public static class NumberOfSquaresQueenCanReach extends AbstractNumberAndPiecePositionalFact {
 
     public NumberOfSquaresQueenCanReach(int number, Piece piece) {

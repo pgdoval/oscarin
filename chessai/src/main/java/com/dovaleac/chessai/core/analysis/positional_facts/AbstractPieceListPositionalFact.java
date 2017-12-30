@@ -39,6 +39,15 @@ public class AbstractPieceListPositionalFact implements PositionalFact{
   }
 
   @Override
+  public String toString() {
+    final StringBuffer sb = new StringBuffer("AbstractPieceListPositionalFact{");
+    sb.append("pieces=").append(pieces);
+    sb.append(", factType=").append(factType);
+    sb.append('}');
+    return sb.toString();
+  }
+
+  @Override
   public PositionalFactType getFactType() {
     return factType;
   }

@@ -43,6 +43,16 @@ public class AbstractNumberAndColorPositionalFact implements PositionalFact {
   }
 
   @Override
+  public String toString() {
+    final StringBuffer sb = new StringBuffer("AbstractNumberAndColorPositionalFact{");
+    sb.append("type=").append(type);
+    sb.append(", number=").append(number);
+    sb.append(", color=").append(color);
+    sb.append('}');
+    return sb.toString();
+  }
+
+  @Override
   public PositionalFactType getFactType() {
     return type;
   }

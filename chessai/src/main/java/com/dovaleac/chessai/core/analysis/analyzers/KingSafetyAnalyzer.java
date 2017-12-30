@@ -123,16 +123,16 @@ public class KingSafetyAnalyzer implements PositionAnalyzer {
         columns = IntStream.of(0, 1);
         break;
       case 1:
-        columns = IntStream.range(0,2);
+        columns = IntStream.range(0,3);
         break;
       case 2:
-        columns = IntStream.range(1,3);
+        columns = IntStream.range(1,4);
         break;
       case 6:
-        columns = IntStream.range(5,7);
+        columns = IntStream.range(5,8);
         break;
       case 7:
-        columns = IntStream.of(6,7);
+        columns = IntStream.of(6,8);
         break;
       default:
         return null;
